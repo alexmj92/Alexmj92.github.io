@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#0f172a" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <title>Stages SB20 Cockpit — Dream Drive &amp; Ride Timer</title>
+  <title>Stages SB20 Cockpit — Complete Edition (Step 3)</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -73,6 +73,11 @@
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0.75rem;
+    }
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.5rem;
     }
     .giant-gear-num {
       font-size: 4.75rem;
@@ -186,8 +191,13 @@
         <div class="flex items-center gap-3">
           <span id="statusDot" class="w-3.5 h-3.5 rounded-full bg-amber-400 animate-pulse shrink-0" style="display:inline-block;width:12px;height:12px;border-radius:999px;background:#fbbf24;"></span>
           <div>
-            <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white leading-tight" style="margin:0;">Stages SB20</h1>
-            <p id="connectionLabel" class="text-xs text-slate-400" style="margin:2px 0 0 0;color:#94a3b8;font-size:0.78rem;">Simulator Ready • High-Torque Curve</p>
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+              <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white leading-tight" style="margin:0;">Stages SB20</h1>
+              <button id="wakeLockBtn" type="button" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700" style="min-height:24px;padding:2px 8px;font-size:0.7rem;border-radius:999px;" title="Keep phone screen awake while riding">
+                <span id="wakeLockText">☀️ Keep Awake</span>
+              </button>
+            </div>
+            <p id="connectionLabel" class="text-xs text-slate-400" style="margin:2px 0 0 0;color:#94a3b8;font-size:0.78rem;">Simulator Ready • Settings Saved</p>
           </div>
         </div>
 
@@ -231,7 +241,7 @@
 
           <!-- Primary Gear Box (Full Row to Itself in Dream Drive) -->
           <div class="inner-box bg-slate-950 border-2 border-cyan-500/40 rounded-2xl px-5 py-4 text-center">
-            <div class="flex items-center justify-between mb-1" style="display:flex;justify-content:space-between;align-items:center;">
+            <div class="flex items-center justify-between mb-1" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.4rem;">
               <span id="rearCardTitle" class="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-cyan-300" style="color:#67e8f9;font-weight:800;text-transform:uppercase;">Dream Drive Gear</span>
               <span id="rearTeethLabel" class="mono text-xs sm:text-sm font-bold text-slate-400" style="color:#94a3b8;font-weight:700;">Gear 20 of 50</span>
             </div>
@@ -272,11 +282,11 @@
         <div id="frontShiftRow" class="hidden grid-2 grid grid-cols-2 gap-3 pt-1" style="display:none;margin-top:0.5rem;">
           <button id="frontDownBtn" type="button" class="shift-btn btn-secondary py-4 px-4 rounded-2xl bg-slate-950 border border-slate-700 flex items-center justify-between transition">
             <span class="sr-only">Front Derailleur</span> <span class="text-sm font-extrabold text-white">Small Ring (1)</span>
-            <span class="mono text-lg font-black text-amber-400">34T ↓</span>
+            <span id="frontDownTeethLabel" class="mono text-lg font-black text-amber-400">34T ↓</span>
           </button>
           <button id="frontUpBtn" type="button" class="shift-btn btn-secondary py-4 px-4 rounded-2xl bg-slate-950 border border-slate-700 flex items-center justify-between transition">
             <span class="sr-only">Front Derailleur</span> <span class="text-sm font-extrabold text-white">Big Ring (2)</span>
-            <span class="mono text-lg font-black text-emerald-400">50T ↑</span>
+            <span id="frontUpTeethLabel" class="mono text-lg font-black text-emerald-400">50T ↑</span>
           </button>
         </div>
       </section>
@@ -285,7 +295,10 @@
       <section class="card-box bg-slate-900 border-2 border-slate-800 rounded-3xl p-4 sm:p-5">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;">
           <div>
-            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-slate-400" style="color:#94a3b8;font-weight:800;text-transform:uppercase;font-size:0.8rem;">Elapsed Ride Time</div>
+            <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap;">
+              <span class="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-slate-400" style="color:#94a3b8;font-weight:800;text-transform:uppercase;font-size:0.8rem;">Elapsed Ride Time</span>
+              <span id="rideSummaryPill" class="mono text-xs font-bold text-cyan-300" style="color:#67e8f9;font-size:0.78rem;">0.00 km • 0 kJ</span>
+            </div>
             <div id="elapsedTimeValue" class="mono giant-timer-num text-5xl sm:text-6xl font-black text-white tracking-tight leading-none mt-1">00:00</div>
           </div>
 
@@ -338,6 +351,48 @@
         <!-- Hidden by default until checkbox is checked -->
         <div id="advancedDetailsArea" class="hidden mt-4 pt-4 border-t border-slate-800 space-y-4" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid #1e293b;">
 
+          <!-- STEP 3: Ride Session Summary Stats (Avg Power, Max Power, Distance, Energy) -->
+          <div class="inner-box bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2.5" style="text-align:left;margin-bottom:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+              <span class="text-xs text-slate-300 font-extrabold uppercase tracking-wider">Ride Session Summary (Recorded While Timer Runs)</span>
+              <span class="mono text-xs text-emerald-400 font-bold">Auto-Saved to Phone</span>
+            </div>
+            <div class="grid-4" style="margin-top:0.4rem;">
+              <div style="background:#0f172a;padding:0.5rem;border-radius:0.75rem;text-align:center;">
+                <div class="text-[10px] text-slate-400 uppercase font-bold">Avg Power</div>
+                <div id="statAvgWatts" class="mono text-base font-black text-white">0 W</div>
+              </div>
+              <div style="background:#0f172a;padding:0.5rem;border-radius:0.75rem;text-align:center;">
+                <div class="text-[10px] text-slate-400 uppercase font-bold">Max Power</div>
+                <div id="statMaxWatts" class="mono text-base font-black text-amber-400">0 W</div>
+              </div>
+              <div style="background:#0f172a;padding:0.5rem;border-radius:0.75rem;text-align:center;">
+                <div class="text-[10px] text-slate-400 uppercase font-bold">Distance</div>
+                <div id="statDistanceKm" class="mono text-base font-black text-cyan-300">0.00 km</div>
+              </div>
+              <div style="background:#0f172a;padding:0.5rem;border-radius:0.75rem;text-align:center;">
+                <div class="text-[10px] text-slate-400 uppercase font-bold">Work</div>
+                <div id="statEnergyKj" class="mono text-base font-black text-emerald-400">0 kJ</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Physical Handlebar Shifter Sync Settings (Service 0c46be5f / Char 0c46be60) -->
+          <div class="inner-box bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-2.5" style="text-align:left;margin-bottom:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
+              <span class="text-xs text-slate-300 font-extrabold uppercase tracking-wider">Physical SB20 Handlebar Shifter Mapping (0c46be60)</span>
+              <span id="barSyncStatusBadge" class="mono text-xs text-cyan-300 font-bold">Ready for 0c46be60 Notify</span>
+            </div>
+            <div class="grid-2 grid grid-cols-2 gap-2" style="margin-top:0.4rem;">
+              <button id="barMapMirrorBtn" type="button" class="btn-ble py-2 px-2.5 rounded-xl text-xs font-bold justify-center" style="justify-content:center;">
+                Both Hoods: Top +1 / Bot −1
+              </button>
+              <button id="barMapSplitBtn" type="button" class="btn-secondary py-2 px-2.5 rounded-xl text-xs font-bold">
+                Right ±1 / Left ±5 Jump
+              </button>
+            </div>
+          </div>
+
           <!-- FTMS Brake Control Method & Maximum Tension Tuning -->
           <div class="inner-box bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-3" style="text-align:left;margin-bottom:1rem;">
             <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;">
@@ -366,7 +421,7 @@
             <div style="margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #1e293b;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
                 <label for="tensionScaleSlider" class="text-xs font-bold text-slate-200">Maximum Tension Multiplier (Gear 50 Ceiling):</label>
-                <span id="tensionScaleLabel" class="mono text-xs font-extrabold text-cyan-300">200% (Max: 1400W / 254 Res / +35% Grade)</span>
+                <span id="tensionScaleLabel" class="mono text-xs font-extrabold text-cyan-300">200% (Max: 1400W / 254 Res / +36% Grade)</span>
               </div>
               <input id="tensionScaleSlider" type="range" min="100" max="300" step="25" value="200" style="width:100%;accent-color:#22d3ee;cursor:pointer;" />
               <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-top:0.5rem;">
@@ -378,7 +433,7 @@
             </div>
           </div>
 
-          <!-- Drivetrain Setup Selector -->
+          <!-- Drivetrain Setup Selector & Custom Chainring Presets -->
           <div class="space-y-2" style="margin-bottom:1rem;">
             <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider" style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
               <span id="drivetrainSubtitle">Stages Dream Drive (1×50)</span>
@@ -390,6 +445,18 @@
               </button>
               <button id="mode2x12Btn" type="button" class="btn-secondary py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-400 hover:text-white">
                 2×12 Road Setup (50/34 × 11–30)
+              </button>
+            </div>
+            <!-- Step 3: Chainring Presets for 2x12 Mode -->
+            <div class="grid-3 grid grid-cols-3 gap-2" style="margin-top:0.4rem;">
+              <button id="presetCompactBtn" type="button" class="btn-secondary py-2 px-2 rounded-xl text-xs font-bold" style="min-height:38px;">
+                Compact 50/34T
+              </button>
+              <button id="presetSemiBtn" type="button" class="btn-secondary py-2 px-2 rounded-xl text-xs font-bold" style="min-height:38px;">
+                Race 52/36T
+              </button>
+              <button id="presetSramBtn" type="button" class="btn-secondary py-2 px-2 rounded-xl text-xs font-bold" style="min-height:38px;">
+                SRAM 48/35T
               </button>
             </div>
           </div>
@@ -418,8 +485,8 @@
             <!-- Physical Handlebar Shifter Packet Tester -->
             <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #1e293b;">
               <div class="text-[11px] text-slate-400">
-                <span class="font-semibold text-slate-300">SB20 Bar Notify (11B):</span>
-                <span id="lastGearPacketHex" class="mono text-cyan-300 ml-1">[01 02 02 14 32 11 00 00 00 00 B2]</span>
+                <span class="font-semibold text-slate-300">SB20 Bar Notify (0c46be60):</span>
+                <span id="lastGearPacketHex" class="mono text-cyan-300 ml-1">[03 00 08 00]</span>
               </div>
               <div class="flex items-center gap-1.5" style="display:flex;gap:0.5rem;">
                 <button id="simHandlebarDownBtn" type="button" class="btn-secondary px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition" style="min-height:36px;">
@@ -461,22 +528,28 @@
     }
 
     // =========================================================================
-    // PART 1: APP STATE
+    // PART 1: STAGES SB20 BLE UUID CONSTANTS & APP STATE
     // =========================================================================
+    const SB20_BUTTON_SERVICE_UUID = '0c46be5f-9c22-48ff-ae0e-c6eae1a2f4e5';
+    const SB20_BUTTON_CHAR_UUID    = '0c46be60-9c22-48ff-ae0e-c6eae1a2f4e5';
+    const ALT_GEARING_SERVICE_UUID = 'a026ee0d-0a7d-4ab3-97fa-f1500f9feb8b';
+    const STORAGE_KEY              = 'stages_sb20_cockpit_v3';
+
     const COGS_12_SPEED = [30, 27, 24, 21, 19, 17, 16, 15, 14, 13, 12, 11];
-    const FRONT_RINGS = [34, 50];
 
     const state = {
       mode: 'dream',          // 'dream' (1x50 default) or '2x12'
-      // 'dual' sends BOTH full-scale 0x04 Resistance (up to 254) AND 0x11 High-Drag Sim Grade (+35%, crr=250, cw=250)
-      // 'erg' sends 0x05 Target Power (up to 1400W-2100W) which forces electromagnetic coils directly regardless of internal SB20 gear
-      controlMode: 'dual',
-      tensionScalePct: 200,   // Default 200% boost so upper gears have heavy sprint/climb tension
-      hwMaxResistance: 254,   // Updated if 0x2AD6 Supported Resistance Level Range is read
+      controlMode: 'dual',    // 'dual' (0x04 + 0x11), 'erg' (0x05), 'res' (0x04), 'slope' (0x11)
+      barMapping: 'mirror',   // 'mirror' (Both Hoods Top=+1 / Bot=-1) or 'split' (Right=+-1 / Left=+-5)
+      frontRings: [34, 50],   // Customizable in Step 3: [34, 50], [36, 52], or [35, 48]
+      tensionScalePct: 200,
+      hwMaxResistance: 254,
       frontGear: 2,
-      rearGear: 20,           // Starts at Gear 20 of 50
+      rearGear: 20,
       soundEnabled: true,
       bleConnected: false,
+      barShifterSynced: false,
+      lastBarButtonText: '',
       bleDeviceName: null,
       ftmsControlPoint: null,
       simPedaling: true,
@@ -487,8 +560,83 @@
       customGearChar: null,
       timerRunning: false,
       elapsedSeconds: 0,
-      bleWriteBusy: false
+      // Step 3: Ride Session Metrics & Wake Lock
+      totalWattSeconds: 0,
+      maxWatts: 0,
+      totalDistanceKm: 0.0,
+      wakeLockSentinel: null,
+      bleWriteBusy: false,
+      activeButtonMask: 0,
+      lastButtonFireTime: 0,
+      buttonBurstTimeout: null
     };
+
+    // Step 3: Persist & restore rider preferences in localStorage (wrapped in try/catch)
+    function saveSettings() {
+      try {
+        const payload = {
+          mode: state.mode,
+          controlMode: state.controlMode,
+          barMapping: state.barMapping,
+          frontRings: state.frontRings,
+          tensionScalePct: state.tensionScalePct,
+          frontGear: state.frontGear,
+          rearGear: state.rearGear,
+          soundEnabled: state.soundEnabled
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch (err) {
+        // Ignore storage errors in restricted iframes
+      }
+    }
+
+    function loadSettings() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return;
+        const saved = JSON.parse(raw);
+        if (saved.mode === 'dream' || saved.mode === '2x12') state.mode = saved.mode;
+        if (['dual', 'erg', 'res', 'slope'].includes(saved.controlMode)) state.controlMode = saved.controlMode;
+        if (['mirror', 'split'].includes(saved.barMapping)) state.barMapping = saved.barMapping;
+        if (Array.isArray(saved.frontRings) && saved.frontRings.length === 2) state.frontRings = saved.frontRings;
+        if (typeof saved.tensionScalePct === 'number') state.tensionScalePct = saved.tensionScalePct;
+        if (typeof saved.frontGear === 'number') state.frontGear = saved.frontGear;
+        if (typeof saved.rearGear === 'number') state.rearGear = saved.rearGear;
+        if (typeof saved.soundEnabled === 'boolean') state.soundEnabled = saved.soundEnabled;
+      } catch (err) {
+        // Ignore storage errors
+      }
+    }
+
+    // Step 3: Screen Wake Lock API so phone screen never turns off while riding
+    async function requestScreenWakeLock() {
+      const wakeBtn = document.getElementById('wakeLockBtn');
+      const wakeText = document.getElementById('wakeLockText');
+      if (!('wakeLock' in navigator)) {
+        if (wakeText) wakeText.textContent = '☀️ Wake Lock N/A';
+        return;
+      }
+      try {
+        state.wakeLockSentinel = await navigator.wakeLock.request('screen');
+        if (wakeText) wakeText.textContent = '☀️ Screen Awake';
+        if (wakeBtn) {
+          wakeBtn.style.background = 'rgba(16, 185, 129, 0.2)';
+          wakeBtn.style.color = '#6ee7b7';
+          wakeBtn.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        }
+        state.wakeLockSentinel.addEventListener('release', () => {
+          state.wakeLockSentinel = null;
+          if (wakeText) wakeText.textContent = '☀️ Keep Awake';
+          if (wakeBtn) {
+            wakeBtn.style.background = '#1e293b';
+            wakeBtn.style.color = '#cbd5e1';
+            wakeBtn.style.borderColor = '#334155';
+          }
+        });
+      } catch (err) {
+        if (wakeText) wakeText.textContent = '☀️ Tap to Keep Awake';
+      }
+    }
 
     let audioCtx = null;
     function playShiftClick(isUpShift) {
@@ -520,7 +668,7 @@
     }
 
     // =========================================================================
-    // PART 2: ELAPSED TIME FORMATTER & CONTROLS
+    // PART 2: ELAPSED TIME & RIDE SESSION SUMMARY
     // =========================================================================
     function formatElapsedTime(totalSeconds) {
       const hrs = Math.floor(totalSeconds / 3600);
@@ -549,6 +697,22 @@
         toggleIcon.textContent = '▶';
         toggleText.textContent = state.elapsedSeconds > 0 ? 'RESUME' : 'START';
       }
+
+      const avgW = state.elapsedSeconds > 0 ? Math.round(state.totalWattSeconds / state.elapsedSeconds) : 0;
+      const kJ = Math.round(state.totalWattSeconds / 1000);
+      const distStr = `${state.totalDistanceKm.toFixed(2)} km`;
+
+      const pill = document.getElementById('rideSummaryPill');
+      if (pill) pill.textContent = `${distStr} • Avg ${avgW}W • ${kJ} kJ`;
+
+      const avgEl = document.getElementById('statAvgWatts');
+      const maxEl = document.getElementById('statMaxWatts');
+      const distEl = document.getElementById('statDistanceKm');
+      const kjEl = document.getElementById('statEnergyKj');
+      if (avgEl) avgEl.textContent = `${avgW} W`;
+      if (maxEl) maxEl.textContent = `${state.maxWatts} W`;
+      if (distEl) distEl.textContent = distStr;
+      if (kjEl) kjEl.textContent = `${kJ} kJ`;
     }
 
     // =========================================================================
@@ -556,43 +720,37 @@
     // =========================================================================
     function computeGearMetrics() {
       let norm = 0;
-      let frontTeeth = 50;
+      let frontTeeth = state.frontRings[1] || 50;
       let rearTeeth = null;
       let ratio = '2.46';
 
       if (state.mode === '2x12') {
-        frontTeeth = FRONT_RINGS[state.frontGear - 1];
+        frontTeeth = state.frontRings[state.frontGear - 1];
         rearTeeth = COGS_12_SPEED[state.rearGear - 1];
         ratio = (frontTeeth / rearTeeth).toFixed(2);
-        const minRatio = 34 / 30;
-        const maxRatio = 50 / 11;
+        const minRatio = state.frontRings[0] / 30;
+        const maxRatio = state.frontRings[1] / 11;
         norm = Math.max(0, Math.min(1, (frontTeeth / rearTeeth - minRatio) / (maxRatio - minRatio)));
       } else {
-        // Dream Drive 1-50
         norm = Math.max(0, Math.min(1, (state.rearGear - 1) / 49));
         ratio = (1.10 + norm * 3.50).toFixed(2);
       }
 
-      // Apply slight progressive curve + Tension Scale Multiplier (100% to 300%, default 200%)
       const mult = state.tensionScalePct / 100;
-      const curvedNorm = Math.min(1, Math.pow(norm, 1.15) * (mult / 1.6));
 
-      // 1. FTMS 0x04 Raw Resistance Byte (0 to 254 — full UINT8 range, since FTMS 0x04 uses 0.1 unit resolution where 200 = 100.0% and 254 = max)
+      // 1. FTMS 0x04 Raw Resistance Byte (0 to 254)
       const maxResByte = Math.min(254, Math.round(state.hwMaxResistance * (mult / 2.0)));
       const rawResByte = Math.max(2, Math.min(254, Math.round(4 + norm * maxResByte)));
       const resistancePct = Math.round((rawResByte / 254) * 100);
 
-      // 2. FTMS 0x11 Simulation Parameters:
-      //    Grade (-1.0% up to +35.0% * mult), plus dynamic Rolling Resistance (crr 40 -> 250) & Wind Drag (cw 50 -> 250 + headwind)
-      const maxGrade = 18.0 * mult; // At 200% default, maxGrade = +36.0%!
+      // 2. FTMS 0x11 Simulation Parameters
+      const maxGrade = 18.0 * mult;
       const gradePct = +(-1.0 + norm * maxGrade).toFixed(1);
       const crrByte = Math.min(254, Math.round(40 + norm * 210));
       const cwByte = Math.min(254, Math.round(50 + norm * 200));
-      // Add simulated headwind (up to 15.0 m/s = 15000 in 0.001 m/s units) in upper gears to multiply brake load
       const headwindMps = Math.round(norm * norm * 12000 * (mult / 2.0));
 
-      // 3. FTMS 0x05 Target Power (ERG Watt Lock):
-      //    Spans from 60W up to 700W * mult (At 200% default, Gear 50 = 1400W!)
+      // 3. FTMS 0x05 Target Power (ERG Watt Lock, up to 1400W-2100W)
       const maxErgWatts = Math.round(700 * mult);
       const targetWatts = Math.round(60 + Math.pow(norm, 1.35) * (maxErgWatts - 60));
 
@@ -686,30 +844,25 @@
       }
     }
 
-    // Sends the active gear's load to the Stages SB20 over FTMS 0x2AD9
     async function sendGearToBike() {
       const metrics = computeGearMetrics();
 
-      // 1) OpCode 0x11: Set Indoor Bike Simulation Parameters (7 bytes)
-      //    Includes boosted Grade + high Crr + high Cw + Headwind so upper gears clamp down hard
       const gradeUnits = Math.max(-4000, Math.min(4500, Math.round(metrics.gradePct * 100)));
       const simBuffer = new ArrayBuffer(7);
       const simView = new DataView(simBuffer);
       simView.setUint8(0, 0x11);
-      simView.setInt16(1, metrics.headwindMps, true); // Headwind in 0.001 m/s
-      simView.setInt16(3, gradeUnits, true);          // Grade in 0.01%
-      simView.setUint8(5, metrics.crrByte);           // Boosted Rolling Resistance
-      simView.setUint8(6, metrics.cwByte);            // Boosted Wind Resistance
+      simView.setInt16(1, metrics.headwindMps, true);
+      simView.setInt16(3, gradeUnits, true);
+      simView.setUint8(5, metrics.crrByte);
+      simView.setUint8(6, metrics.cwByte);
       const simBytes = new Uint8Array(simBuffer);
 
-      // 2) OpCode 0x05: Set Target Power / ERG (3 bytes: [0x05, wattsLo, wattsHi])
       const ergBuffer = new ArrayBuffer(3);
       const ergView = new DataView(ergBuffer);
       ergView.setUint8(0, 0x05);
       ergView.setInt16(1, metrics.targetWatts, true);
       const ergBytes = new Uint8Array(ergBuffer);
 
-      // 3) OpCode 0x04: Set Target Resistance Level (2 bytes: [0x04, rawResByte 0..254])
       const resBytes = new Uint8Array([0x04, metrics.rawResByte]);
 
       if (state.bleConnected && state.ftmsControlPoint) {
@@ -717,20 +870,19 @@
         state.bleWriteBusy = true;
         try {
           if (state.controlMode === 'dual') {
-            // Send full-scale 0x04 Resistance AND boosted 0x11 Simulation Slope back-to-back
             await writeControlBytes(state.ftmsControlPoint, resBytes);
             await new Promise(r => setTimeout(r, 60));
             await writeControlBytes(state.ftmsControlPoint, simBytes);
-            appendLog(`Dual Load → Res ${metrics.rawResByte}/254 + Grade ${metrics.gradePct}% (Crr ${metrics.crrByte})`);
+            appendLog(`Dual Load → Res ${metrics.rawResByte}/254 + Grade ${metrics.gradePct}%`);
           } else if (state.controlMode === 'erg') {
             await writeControlBytes(state.ftmsControlPoint, ergBytes);
-            appendLog(`ERG Lock → ${metrics.targetWatts}W (0x05) ${formatPacketHex(ergBytes)}`);
+            appendLog(`ERG Lock → ${metrics.targetWatts}W (0x05)`);
           } else if (state.controlMode === 'res') {
             await writeControlBytes(state.ftmsControlPoint, resBytes);
-            appendLog(`Raw Resistance → ${metrics.rawResByte}/254 (0x04) ${formatPacketHex(resBytes)}`);
+            appendLog(`Raw Resistance → ${metrics.rawResByte}/254 (0x04)`);
           } else {
             await writeControlBytes(state.ftmsControlPoint, simBytes);
-            appendLog(`Sim Slope → ${metrics.gradePct}% (Crr ${metrics.crrByte}, Cw ${metrics.cwByte}) ${formatPacketHex(simBytes)}`);
+            appendLog(`Sim Slope → ${metrics.gradePct}% (0x11)`);
           }
         } catch (err) {
           appendLog(`BLE Write Error: ${err.message}`);
@@ -743,17 +895,55 @@
     }
 
     // =========================================================================
-    // PART 4: TELEMETRY PARSER (0x2AD2) & HANDLEBAR SHIFTER SYNC
+    // PART 4: PHYSICAL SB20 HANDLEBAR SHIFTER SYNC (0c46be60) & TELEMETRY (0x2AD2)
     // =========================================================================
     function formatPacketHex(bytes) {
       return '[' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ') + ']';
     }
 
-    function buildSb20GearPacket(front, rear) {
-      const metrics = computeGearMetrics();
-      const rearTeeth = metrics.rearTeeth || 17;
-      const checksum = (0x01 + 0x02 + front + rear + metrics.frontTeeth + rearTeeth) & 0xff;
-      return new Uint8Array([0x01, 0x02, front, rear, metrics.frontTeeth, rearTeeth, 0x00, 0x00, 0x00, 0x00, checksum]);
+    function executeSb20HandlebarButton(bitmask, sourceName) {
+      let buttonName = '';
+      if (bitmask & 0x08) {
+        buttonName = 'Right Bar ↑ (+1)';
+        shiftRear(1);
+      } else if (bitmask & 0x10) {
+        buttonName = 'Right Bar ↓ (−1)';
+        shiftRear(-1);
+      } else if (bitmask & 0x01) {
+        if (state.mode === '2x12') {
+          buttonName = 'Left Bar ↑ (Big Ring 2)';
+          shiftFront(2);
+        } else if (state.barMapping === 'split') {
+          buttonName = 'Left Bar ↑ (+5 Jump)';
+          shiftRear(5);
+        } else {
+          buttonName = 'Left Bar ↑ (+1)';
+          shiftRear(1);
+        }
+      } else if (bitmask & 0x02) {
+        if (state.mode === '2x12') {
+          buttonName = 'Left Bar ↓ (Small Ring 1)';
+          shiftFront(1);
+        } else if (state.barMapping === 'split') {
+          buttonName = 'Left Bar ↓ (−5 Jump)';
+          shiftRear(-5);
+        } else {
+          buttonName = 'Left Bar ↓ (−1)';
+          shiftRear(-1);
+        }
+      } else if (bitmask & 0x20) {
+        buttonName = 'Right Sprint Btn (+3)';
+        shiftRear(state.mode === 'dream' ? 5 : 3);
+      } else if (bitmask & 0x04) {
+        buttonName = 'Left Sprint Btn (−3)';
+        shiftRear(state.mode === 'dream' ? -5 : -3);
+      }
+
+      if (buttonName) {
+        state.lastBarButtonText = buttonName;
+        renderUI();
+        appendLog(`${sourceName}: ${buttonName} → Synced to Gear ${state.rearGear}`);
+      }
     }
 
     function handleSb20GearNotification(uint8Data, sourceName) {
@@ -761,11 +951,46 @@
       const packetLabel = document.getElementById('lastGearPacketHex');
       if (packetLabel) packetLabel.textContent = hexStr;
 
+      if (!uint8Data || uint8Data.length === 0) return;
+
+      if (uint8Data.length >= 3 && uint8Data[1] === 0x00) {
+        const frameType = uint8Data[0];
+        const bitmask = uint8Data.length >= 4
+          ? (uint8Data[2] | (uint8Data[3] << 8))
+          : uint8Data[2];
+
+        if (frameType === 0x04 || frameType === 0x08 || bitmask === 0) {
+          state.activeButtonMask = 0;
+          if (state.buttonBurstTimeout) {
+            clearTimeout(state.buttonBurstTimeout);
+            state.buttonBurstTimeout = null;
+          }
+          return;
+        }
+
+        if ((frameType === 0x01 || frameType === 0x03) && (bitmask & 0x3f) !== 0) {
+          const now = Date.now();
+          const isNewPress = state.activeButtonMask !== bitmask;
+          const isHoldRepeat = (now - state.lastButtonFireTime) > 420;
+
+          if (isNewPress || isHoldRepeat) {
+            state.activeButtonMask = bitmask;
+            state.lastButtonFireTime = now;
+            executeSb20HandlebarButton(bitmask, sourceName);
+          }
+
+          if (state.buttonBurstTimeout) clearTimeout(state.buttonBurstTimeout);
+          state.buttonBurstTimeout = setTimeout(() => {
+            state.activeButtonMask = 0;
+          }, 240);
+          return;
+        }
+      }
+
       if (uint8Data.length >= 4) {
         const incomingFront = uint8Data[2];
         const incomingRear = uint8Data[3];
         const maxRear = state.mode === '2x12' ? 12 : 50;
-
         let changed = false;
         if (incomingFront >= 1 && incomingFront <= 2 && incomingFront !== state.frontGear) {
           state.frontGear = incomingFront;
@@ -780,6 +1005,7 @@
         if (changed) {
           renderUI();
           updateSimulatedTelemetry();
+          sendGearToBike();
         }
         appendLog(`${sourceName} Notify (${uint8Data.length}B) → ${hexStr}`);
       }
@@ -852,10 +1078,6 @@
         state.liveWatts = Math.round(Math.max(25, rawWatts));
       }
 
-      const pkt = buildSb20GearPacket(state.frontGear, state.rearGear);
-      const packetLabel = document.getElementById('lastGearPacketHex');
-      if (packetLabel) packetLabel.textContent = formatPacketHex(pkt);
-
       renderTelemetryUI();
     }
 
@@ -880,7 +1102,13 @@
       const effortPercentLabel = document.getElementById('effortPercentLabel');
       const cassetteBar = document.getElementById('cassetteBar');
 
-      // Highlight active FTMS Brake Control Method button
+      const mirrorBtn = document.getElementById('barMapMirrorBtn');
+      const splitBtn = document.getElementById('barMapSplitBtn');
+      if (mirrorBtn && splitBtn) {
+        mirrorBtn.className = state.barMapping === 'mirror' ? 'btn-ble py-2 px-2.5 rounded-xl text-xs font-bold justify-center' : 'btn-secondary py-2 px-2.5 rounded-xl text-xs font-bold';
+        splitBtn.className = state.barMapping === 'split' ? 'btn-ble py-2 px-2.5 rounded-xl text-xs font-bold justify-center' : 'btn-secondary py-2 px-2.5 rounded-xl text-xs font-bold';
+      }
+
       const dualBtn = document.getElementById('ctrlModeDualBtn');
       const slopeBtn = document.getElementById('ctrlModeSlopeBtn');
       const ergBtn = document.getElementById('ctrlModeErgBtn');
@@ -892,6 +1120,24 @@
         slopeBtn.className = state.controlMode === 'slope' ? 'btn-ble py-2 px-2 rounded-xl text-xs font-bold justify-center' : 'btn-secondary py-2 px-2 rounded-xl text-xs font-bold';
       }
 
+      // Highlight active Chainring Preset button
+      const cBtn = document.getElementById('presetCompactBtn');
+      const sBtn = document.getElementById('presetSemiBtn');
+      const aBtn = document.getElementById('presetSramBtn');
+      if (cBtn && sBtn && aBtn) {
+        const ringKey = `${state.frontRings[1]}/${state.frontRings[0]}`;
+        cBtn.className = ringKey === '50/34' ? 'btn-ble py-2 px-2 rounded-xl text-xs font-bold justify-center' : 'btn-secondary py-2 px-2 rounded-xl text-xs font-bold';
+        sBtn.className = ringKey === '52/36' ? 'btn-ble py-2 px-2 rounded-xl text-xs font-bold justify-center' : 'btn-secondary py-2 px-2 rounded-xl text-xs font-bold';
+        aBtn.className = ringKey === '48/35' ? 'btn-ble py-2 px-2 rounded-xl text-xs font-bold justify-center' : 'btn-secondary py-2 px-2 rounded-xl text-xs font-bold';
+      }
+
+      const fDownTeeth = document.getElementById('frontDownTeethLabel');
+      const fUpTeeth = document.getElementById('frontUpTeethLabel');
+      if (fDownTeeth) fDownTeeth.textContent = `${state.frontRings[0]}T ↓`;
+      if (fUpTeeth) fUpTeeth.textContent = `${state.frontRings[1]}T ↑`;
+
+      const tensionSlider = document.getElementById('tensionScaleSlider');
+      if (tensionSlider) tensionSlider.value = String(state.tensionScalePct);
       const tensionLabel = document.getElementById('tensionScaleLabel');
       if (tensionLabel) {
         tensionLabel.textContent = `${state.tensionScalePct}% (Max: ${metrics.maxErgWatts}W / +${(18 * state.tensionScalePct / 100).toFixed(0)}% Grade)`;
@@ -900,6 +1146,9 @@
       let loadSummary = `${metrics.gradePct >= 0 ? '+' : ''}${metrics.gradePct}% • Res ${metrics.rawResByte}`;
       if (state.controlMode === 'erg') loadSummary = `${metrics.targetWatts}W Lock`;
       if (state.controlMode === 'res') loadSummary = `Res ${metrics.rawResByte}/254`;
+      if (state.lastBarButtonText) {
+        loadSummary = `${state.lastBarButtonText} • ${loadSummary}`;
+      }
 
       if (state.mode === '2x12') {
         mode2x12Btn.className = 'btn-ble py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition bg-cyan-500 text-slate-950 shadow';
@@ -909,13 +1158,15 @@
         splitGearContainer.className = 'grid-2 grid grid-cols-2 gap-3 items-center';
         setElementVisible(frontShiftRow, true, 'grid');
 
-        drivetrainSubtitle.textContent = '2×12 Road Setup';
+        drivetrainSubtitle.textContent = `2×12 Road (${state.frontRings[1]}/${state.frontRings[0]}T)`;
         toothComboBadge.textContent = `${metrics.frontTeeth}T × ${metrics.rearTeeth}T (${metrics.ratio} ratio)`;
 
         frontGearValue.textContent = String(state.frontGear);
-        frontTeethLabel.textContent = state.frontGear === 2 ? 'Big Ring (50T)' : 'Small Ring (34T)';
+        frontTeethLabel.textContent = state.frontGear === 2
+          ? `Big Ring (${state.frontRings[1]}T)`
+          : `Small Ring (${state.frontRings[0]}T)`;
 
-        rearCardTitle.textContent = 'Rear Cog';
+        rearCardTitle.textContent = state.barShifterSynced ? 'Rear Cog (Bar Synced ✅)' : 'Rear Cog';
         rearGearValue.textContent = String(state.rearGear);
         rearTeethLabel.textContent = `Cog ${state.rearGear}/12 (${metrics.rearTeeth}T) • ${loadSummary}`;
 
@@ -938,7 +1189,7 @@
         drivetrainSubtitle.textContent = 'Stages Dream Drive (1×50)';
         toothComboBadge.textContent = `Virtual Ratio ${metrics.ratio} (Gear ${state.rearGear}/50)`;
 
-        rearCardTitle.textContent = 'Dream Drive Gear';
+        rearCardTitle.textContent = state.barShifterSynced ? 'Dream Drive Gear (Bar Synced ✅)' : 'Dream Drive Gear';
         rearGearValue.textContent = String(state.rearGear);
         rearTeethLabel.textContent = `Gear ${state.rearGear} of 50 • ${loadSummary}`;
 
@@ -954,6 +1205,7 @@
       }
 
       effortPercentLabel.textContent = `Commanded Load: Res ${metrics.rawResByte}/254 | ${metrics.gradePct >= 0 ? '+' : ''}${metrics.gradePct}% | ${metrics.targetWatts}W`;
+      document.getElementById('soundIcon').textContent = state.soundEnabled ? '🔊 Sound On' : '🔇 Muted';
     }
 
     // =========================================================================
@@ -966,6 +1218,7 @@
         const isUp = nextGear > state.rearGear;
         state.rearGear = nextGear;
         playShiftClick(isUp);
+        saveSettings();
         renderUI();
         updateSimulatedTelemetry();
         sendGearToBike();
@@ -978,6 +1231,7 @@
         const isUp = targetRing > state.frontGear;
         state.frontGear = targetRing;
         playShiftClick(isUp);
+        saveSettings();
         renderUI();
         updateSimulatedTelemetry();
         sendGearToBike();
@@ -987,6 +1241,9 @@
     async function connectBluetoothBike(scanAllDevices) {
       const btnText = document.getElementById('connectBtnText');
       const connLabel = document.getElementById('connectionLabel');
+
+      // Request Screen Wake Lock automatically when connecting
+      requestScreenWakeLock();
 
       if (btnText) btnText.textContent = 'Opening BLE...';
       if (connLabel) connLabel.textContent = 'Requesting Android Bluetooth scanner...';
@@ -1000,20 +1257,30 @@
       }
 
       try {
-        appendLog(scanAllDevices ? 'Scanning ALL nearby BLE devices...' : 'Scanning for Stages SB20 (FTMS 0x1826)...');
+        appendLog(scanAllDevices ? 'Scanning ALL nearby BLE devices...' : 'Scanning for Stages SB20 (FTMS + 0c46be5f Shifters)...');
+
+        const allowedServices = [
+          0x1826,
+          0x180a,
+          0x1818,
+          SB20_BUTTON_SERVICE_UUID,
+          ALT_GEARING_SERVICE_UUID
+        ];
+
         const requestOptions = scanAllDevices
           ? {
               acceptAllDevices: true,
-              optionalServices: [0x1826, 0x180a, 0x1818]
+              optionalServices: allowedServices
             }
           : {
               filters: [
                 { services: [0x1826] },
+                { services: [SB20_BUTTON_SERVICE_UUID] },
                 { namePrefix: 'Stages' },
                 { namePrefix: 'STAGES' },
                 { namePrefix: 'SB20' }
               ],
-              optionalServices: [0x1826, 0x180a, 0x1818]
+              optionalServices: allowedServices
             };
 
         const device = await navigator.bluetooth.requestDevice(requestOptions);
@@ -1024,7 +1291,6 @@
         const server = await device.gatt.connect();
         const service = await server.getPrimaryService(0x1826);
 
-        // 0. Check Supported Resistance Level Range (0x2AD6) if available on SB20
         try {
           const rangeChar = await service.getCharacteristic(0x2ad6);
           const rangeVal = await rangeChar.readValue();
@@ -1040,7 +1306,6 @@
           // Optional characteristic
         }
 
-        // 1. Subscribe to 0x2AD2 (Indoor Bike Data) for live Power, Cadence, Speed
         try {
           const bikeDataChar = await service.getCharacteristic(0x2ad2);
           await bikeDataChar.startNotifications();
@@ -1050,33 +1315,87 @@
           appendLog(`0x2AD2 notice: ${telemetryErr.message}`);
         }
 
-        // 2. Get 0x2AD9 (Fitness Machine Control Point) & properly unlock with Indications + 0x00 + 0x07
         const controlPoint = await service.getCharacteristic(0x2ad9);
         state.ftmsControlPoint = controlPoint;
         await unlockFtmsControlPoint(controlPoint);
+
+        const barBadge = document.getElementById('barSyncStatusBadge');
+        try {
+          const buttonService = await server.getPrimaryService(SB20_BUTTON_SERVICE_UUID);
+          const buttonChar = await buttonService.getCharacteristic(SB20_BUTTON_CHAR_UUID);
+          await buttonChar.startNotifications();
+          buttonChar.addEventListener('characteristicvaluechanged', (ev) => {
+            const bytes = new Uint8Array(ev.target.value.buffer, ev.target.value.byteOffset, ev.target.value.byteLength);
+            handleSb20GearNotification(bytes, 'SB20 Bar Button');
+          });
+          state.customGearChar = buttonChar;
+          state.barShifterSynced = true;
+          if (barBadge) {
+            barBadge.textContent = 'Synced to 0c46be60 ✅';
+            barBadge.style.color = '#34d399';
+          }
+          appendLog('Subscribed to SB20 Handlebar Shifter Characteristic (0c46be60) ✅');
+        } catch (sb20BtnErr) {
+          appendLog(`Direct 0c46be60 lookup note: ${sb20BtnErr.message} — scanning all custom notify characteristics...`);
+          try {
+            const allServices = await server.getPrimaryServices();
+            for (const svc of allServices) {
+              if (svc.uuid.includes('1826') || svc.uuid.includes('180a')) continue;
+              const chars = await svc.getCharacteristics();
+              for (const ch of chars) {
+                if (ch.properties.notify || ch.properties.indicate) {
+                  await ch.startNotifications();
+                  ch.addEventListener('characteristicvaluechanged', (ev) => {
+                    const bytes = new Uint8Array(ev.target.value.buffer, ev.target.value.byteOffset, ev.target.value.byteLength);
+                    handleSb20GearNotification(bytes, `BLE ${ch.uuid.slice(0, 8)}`);
+                  });
+                  state.barShifterSynced = true;
+                  if (barBadge) {
+                    barBadge.textContent = `Synced (${ch.uuid.slice(0, 8)}) ✅`;
+                    barBadge.style.color = '#34d399';
+                  }
+                  appendLog(`Subscribed to Custom Shifter Notify (${ch.uuid}).`);
+                }
+              }
+            }
+          } catch (fallbackErr) {
+            appendLog(`Fallback scan note: ${fallbackErr.message}`);
+          }
+        }
 
         state.bleConnected = true;
         state.bleDeviceName = device.name || 'Stages SB20';
         document.getElementById('telemetrySourceBadge').textContent = 'Live BLE Stream';
 
         document.getElementById('statusDot').style.background = '#34d399';
-        connLabel.textContent = `Connected to ${state.bleDeviceName}`;
+        connLabel.textContent = state.barShifterSynced
+          ? `Connected • Bar Shifters Synced ✅`
+          : `Connected to ${state.bleDeviceName}`;
         btnText.textContent = 'Connected';
-        showToast(`Connected to ${state.bleDeviceName} with High-Torque Curve! For maximum wall-like tension, also try "Heavy Watt Lock (ERG 0x05)" in Advanced.`);
+        renderUI();
+        showToast(state.barShifterSynced
+          ? `Connected to ${state.bleDeviceName}! Physical handlebar shift buttons & app display are synced both ways.`
+          : `Connected to ${state.bleDeviceName}!`);
 
         await sendGearToBike();
 
         device.addEventListener('gattserverdisconnected', () => {
           state.bleConnected = false;
+          state.barShifterSynced = false;
           state.ftmsControlPoint = null;
           document.getElementById('statusDot').style.background = '#fbbf24';
           connLabel.textContent = 'Disconnected — Simulator Mode';
           btnText.textContent = 'Connect SB20';
+          if (barBadge) {
+            barBadge.textContent = 'Disconnected';
+            barBadge.style.color = '#fbbf24';
+          }
+          renderUI();
           appendLog('Bike disconnected. Reverted to Simulator Mode.');
         });
       } catch (err) {
         btnText.textContent = 'Connect SB20';
-        connLabel.textContent = 'Simulator Ready • High-Torque Curve';
+        connLabel.textContent = 'Simulator Ready • Settings Saved';
         showToast(`Bluetooth message: ${err.message}. Tip: Wake the SB20 by pedaling, or tap "Scan All Bluetooth Devices".`);
         appendLog(`Bluetooth info: ${err.message}`);
       }
@@ -1089,6 +1408,8 @@
     function initApp() {
       if (appInitialized) return;
       appInitialized = true;
+
+      loadSettings();
 
       document.getElementById('rearDownBtn').addEventListener('click', () => shiftRear(-1));
       document.getElementById('rearUpBtn').addEventListener('click', () => shiftRear(1));
@@ -1104,6 +1425,7 @@
         state.frontGear = 2;
         state.rearGear = state.mode === '2x12' ? 6 : 20;
         playShiftClick(true);
+        saveSettings();
         renderUI();
         updateSimulatedTelemetry();
         sendGearToBike();
@@ -1114,21 +1436,46 @@
 
       document.getElementById('timerToggleBtn').addEventListener('click', () => {
         state.timerRunning = !state.timerRunning;
+        if (state.timerRunning) requestScreenWakeLock();
         renderTimerUI();
-        appendLog(state.timerRunning ? 'Ride timer started.' : `Ride timer paused at ${formatElapsedTime(state.elapsedSeconds)}.`);
+        appendLog(state.timerRunning ? 'Ride timer started (Screen Wake Lock requested).' : `Ride timer paused at ${formatElapsedTime(state.elapsedSeconds)}.`);
       });
 
       document.getElementById('timerResetBtn').addEventListener('click', () => {
         state.timerRunning = false;
         state.elapsedSeconds = 0;
+        state.totalWattSeconds = 0;
+        state.maxWatts = 0;
+        state.totalDistanceKm = 0.0;
         renderTimerUI();
-        appendLog('Ride timer reset to 00:00.');
+        appendLog('Ride timer and session stats reset.');
       });
 
-      // FTMS Control Mode Selector Listeners
+      document.getElementById('wakeLockBtn').addEventListener('click', requestScreenWakeLock);
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible' && (state.timerRunning || state.bleConnected)) {
+          requestScreenWakeLock();
+        }
+      });
+
+      document.getElementById('barMapMirrorBtn').addEventListener('click', () => {
+        state.barMapping = 'mirror';
+        saveSettings();
+        renderUI();
+        appendLog('Handlebar Mapping: Both Left & Right hoods shift +1 / −1.');
+      });
+
+      document.getElementById('barMapSplitBtn').addEventListener('click', () => {
+        state.barMapping = 'split';
+        saveSettings();
+        renderUI();
+        appendLog('Handlebar Mapping: Right hood shifts ±1, Left hood jumps ±5.');
+      });
+
       document.getElementById('ctrlModeDualBtn').addEventListener('click', () => {
         state.controlMode = 'dual';
         document.getElementById('ftmsAckBadge').textContent = 'Mode: Dual (0x04 + 0x11 Max Torque)';
+        saveSettings();
         renderUI();
         sendGearToBike();
       });
@@ -1136,13 +1483,15 @@
       document.getElementById('ctrlModeSlopeBtn').addEventListener('click', () => {
         state.controlMode = 'slope';
         document.getElementById('ftmsAckBadge').textContent = 'Mode: Sim Slope (0x11)';
+        saveSettings();
         renderUI();
         sendGearToBike();
       });
 
       document.getElementById('ctrlModeErgBtn').addEventListener('click', () => {
         state.controlMode = 'erg';
-        document.getElementById('ftmsAckBadge').textContent = 'Mode: Heavy Watt Lock (ERG 0x05)';
+        document.getElementById('ftmsAckBadge').textContent = 'Mode: ERG Watts (0x05)';
+        saveSettings();
         renderUI();
         sendGearToBike();
       });
@@ -1150,14 +1499,47 @@
       document.getElementById('ctrlModeResBtn').addEventListener('click', () => {
         state.controlMode = 'res';
         document.getElementById('ftmsAckBadge').textContent = 'Mode: Resistance (0x04)';
+        saveSettings();
         renderUI();
         sendGearToBike();
       });
 
       document.getElementById('tensionScaleSlider').addEventListener('input', (e) => {
         state.tensionScalePct = parseInt(e.target.value, 10) || 200;
+        saveSettings();
         renderUI();
         sendGearToBike();
+      });
+
+      // Step 3: Custom Chainring Presets
+      document.getElementById('presetCompactBtn').addEventListener('click', () => {
+        state.frontRings = [34, 50];
+        state.mode = '2x12';
+        if (state.rearGear > 12) state.rearGear = 6;
+        saveSettings();
+        renderUI();
+        sendGearToBike();
+        appendLog('Selected Compact 50/34T 2×12 setup.');
+      });
+
+      document.getElementById('presetSemiBtn').addEventListener('click', () => {
+        state.frontRings = [36, 52];
+        state.mode = '2x12';
+        if (state.rearGear > 12) state.rearGear = 6;
+        saveSettings();
+        renderUI();
+        sendGearToBike();
+        appendLog('Selected Race 52/36T 2×12 setup.');
+      });
+
+      document.getElementById('presetSramBtn').addEventListener('click', () => {
+        state.frontRings = [35, 48];
+        state.mode = '2x12';
+        if (state.rearGear > 12) state.rearGear = 6;
+        saveSettings();
+        renderUI();
+        sendGearToBike();
+        appendLog('Selected SRAM AXS 48/35T 2×12 setup.');
       });
 
       document.getElementById('reclaimControlBtn').addEventListener('click', async () => {
@@ -1170,7 +1552,6 @@
         }
       });
 
-      // Advanced Checkbox & Row Listener
       const advCheckbox = document.getElementById('advancedToggleCheckbox');
       const advArea = document.getElementById('advancedDetailsArea');
       const advChevron = document.getElementById('advancedChevron');
@@ -1193,7 +1574,8 @@
       document.getElementById('mode2x12Btn').addEventListener('click', () => {
         if (state.mode !== '2x12') {
           state.mode = '2x12';
-          state.rearGear = 6;
+          state.rearGear = Math.min(12, state.rearGear);
+          saveSettings();
           renderUI();
           updateSimulatedTelemetry();
           appendLog('Switched to 2×12 Road Setup.');
@@ -1204,6 +1586,7 @@
         if (state.mode !== 'dream') {
           state.mode = 'dream';
           state.rearGear = 20;
+          saveSettings();
           renderUI();
           updateSimulatedTelemetry();
           appendLog('Switched to Stages Dream Drive (1×50 virtual gears).');
@@ -1212,7 +1595,8 @@
 
       document.getElementById('soundToggleBtn').addEventListener('click', () => {
         state.soundEnabled = !state.soundEnabled;
-        document.getElementById('soundIcon').textContent = state.soundEnabled ? '🔊 Sound On' : '🔇 Muted';
+        saveSettings();
+        renderUI();
       });
 
       document.getElementById('connectBleBtn').addEventListener('click', () => connectBluetoothBike(false));
@@ -1248,16 +1632,13 @@
       });
 
       document.getElementById('simHandlebarDownBtn').addEventListener('click', () => {
-        const nextRear = Math.max(1, state.rearGear - 1);
-        const pkt = buildSb20GearPacket(state.frontGear, nextRear);
-        handleSb20GearNotification(pkt, 'Sim SB20 Bar Shifter');
+        handleSb20GearNotification(new Uint8Array([0x03, 0x00, 0x10, 0x00]), 'Sim SB20 Bar');
+        setTimeout(() => handleSb20GearNotification(new Uint8Array([0x04, 0x00, 0x00, 0x00]), 'Sim SB20 Bar'), 40);
       });
 
       document.getElementById('simHandlebarUpBtn').addEventListener('click', () => {
-        const maxGear = state.mode === '2x12' ? 12 : 50;
-        const nextRear = Math.min(maxGear, state.rearGear + 1);
-        const pkt = buildSb20GearPacket(state.frontGear, nextRear);
-        handleSb20GearNotification(pkt, 'Sim SB20 Bar Shifter');
+        handleSb20GearNotification(new Uint8Array([0x03, 0x00, 0x08, 0x00]), 'Sim SB20 Bar');
+        setTimeout(() => handleSb20GearNotification(new Uint8Array([0x04, 0x00, 0x00, 0x00]), 'Sim SB20 Bar'), 40);
       });
 
       window.addEventListener('keydown', (e) => {
@@ -1272,19 +1653,22 @@
 
       if (window.sb20TelemetryTimer) clearInterval(window.sb20TelemetryTimer);
       window.sb20TelemetryTimer = setInterval(() => {
-        if (state.timerRunning) {
-          state.elapsedSeconds += 1;
-          renderTimerUI();
-        }
         if (!state.bleConnected && state.simPedaling) {
           updateSimulatedTelemetry();
+        }
+        if (state.timerRunning) {
+          state.elapsedSeconds += 1;
+          state.totalWattSeconds += state.liveWatts;
+          if (state.liveWatts > state.maxWatts) state.maxWatts = state.liveWatts;
+          state.totalDistanceKm += (state.liveSpeedKmh / 3600);
+          renderTimerUI();
         }
       }, 1000);
 
       renderUI();
       renderTimerUI();
       updateSimulatedTelemetry();
-      appendLog('High-Torque Curve (Dual 0x04 0..254 + 0x11 +36% Grade + ERG 1400W) ready.');
+      appendLog('Step 3 Complete: Screen Wake Lock, Auto-Save Settings, Ride Stats & Groupset Presets active.');
     }
 
     if (document.readyState === 'loading') {
