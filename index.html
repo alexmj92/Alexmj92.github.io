@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0f172a">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Stages SB20 Cockpit</title>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card: #131c2e;
+      --card-border: #23314d;
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-active: #2563eb;
+      --green: #10b981;
+      --green-active: #059669;
+      --amber: #f59e0b;
+      --red: #ef4444;
+      --cyan: #06b6d4;
+    }
+
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 12px;
+      max-width: 700px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 100vh;
+    }
+
+    /* Header Bar */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 12px 16px;
+    }
+
+    .title-group h1 {
+      font-size: 1.25rem;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.85rem;
+      color: var(--amber);
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--amber);
+    }
+
+    .status-connected {
+      color: var(--green);
+    }
+
+    .status-connected .status-dot {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    .btn-connect {
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-connect:active {
+      background: var(--primary-active);
+    }
+
+    /* Main Cockpit Cards */
+    .card {
+      background: var(--card);
+      border: 2px solid var(--card-border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .section-label {
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    /* Row 1: Gear Box */
+    .gear-row {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .shift-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .btn-shift-main {
+      height: 110px;
+      border-radius: 16px;
+      border: 2px solid #334155;
+      background: #1e293b;
+      color: var(--text);
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      touch-action: manipulation;
+    }
+
+    .btn-shift-main.up {
+      background: var(--primary);
+      border-color: #60a5fa;
+    }
+
+    .btn-shift-main:active {
+      transform: scale(0.97);
+      filter: brightness(1.15);
+    }
+
+    .btn-shift-jump {
+      height: 54px;
+      border-radius: 12px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: var(--muted);
+      font-size: 1.35rem;
+      font-weight: 800;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .btn-shift-jump:active {
+      background: #1e293b;
+      color: var(--text);
+    }
+
+    .gear-display-center {
+      text-align: center;
+      background: #090d16;
+      border: 2px solid #1e293b;
+      border-radius: 16px;
+      padding: 14px 8px;
+    }
+
+    .gear-number {
+      font-size: 5.5rem;
+      font-weight: 900;
+      line-height: 1;
+      color: var(--cyan);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .gear-sub {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* Progress Bar inside Gear Card */
+    .gear-bar-bg {
+      width: 100%;
+      height: 10px;
+      background: #090d16;
+      border-radius: 5px;
+      margin-top: 14px;
+      overflow: hidden;
+    }
+
+    .gear-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary), var(--cyan));
+      width: 40%;
+      transition: width 0.15s ease-out;
+    }
+
+    /* Chainring Selector for 2x12 mode */
+    .chainring-row {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .btn-ring {
+      padding: 14px;
+      border-radius: 12px;
+      border: 2px solid #334155;
+      background: #0f172a;
+      color: var(--muted);
+      font-size: 1.1rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .btn-ring.active {
+      background: #1e3a8a;
+      border-color: #60a5fa;
+      color: white;
+    }
+
+    /* Row 2: Elapsed Time Box */
+    .timer-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .timer-readout {
+      font-size: 4.25rem;
+      font-weight: 900;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+      background: #090d16;
+      border: 2px solid #1e293b;
+      border-radius: 14px;
+      padding: 10px;
+      line-height: 1.1;
+    }
+
+    .timer-controls {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 12px;
+    }
+
+    .btn-timer-main {
+      height: 72px;
+      border-radius: 14px;
+      border: none;
+      background: var(--green);
+      color: #052e16;
+      font-size: 1.75rem;
+      font-weight: 900;
+      letter-spacing: 1px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .btn-timer-main.running {
+      background: var(--amber);
+      color: #451a03;
+    }
+
+    .btn-timer-reset {
+      height: 72px;
+      border-radius: 14px;
+      border: 2px solid #334155;
+      background: #1e293b;
+      color: var(--text);
+      font-size: 1.35rem;
+      font-weight: 800;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    /* Row 3: Telemetry Trio */
+    .telemetry-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .metric-box {
+      background: var(--card);
+      border: 2px solid var(--card-border);
+      border-radius: 16px;
+      padding: 14px 8px;
+      text-align: center;
+    }
+
+    .metric-label {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .metric-value {
+      font-size: 3.1rem;
+      font-weight: 900;
+      line-height: 1.1;
+      margin: 6px 0 2px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric-unit {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .val-power { color: #facc15; }
+    .val-cadence { color: #38bdf8; }
+    .val-speed { color: #4ade80; }
+
+    /* Row 4: Advanced Checkbox & Area */
+    .advanced-toggle-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 14px 16px;
+      cursor: pointer;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+    .advanced-toggle-bar input {
+      width: 24px;
+      height: 24px;
+      accent-color: var(--primary);
+    }
+
+    .advanced-panel {
+      display: none;
+      flex-direction: column;
+      gap: 14px;
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .advanced-panel.open {
+      display: flex;
+    }
+
+    .adv-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn-small {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #334155;
+      background: #0f172a;
+      color: var(--text);
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .btn-small.active {
+      background: var(--primary);
+      border-color: #60a5fa;
+    }
+
+    .slider-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slider-wrap input[type="range"] {
+      width: 100%;
+      height: 28px;
+      accent-color: var(--primary);
+    }
+
+    .log-box {
+      background: #050811;
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header -->
+  <header class="header">
+    <div class="title-group">
+      <h1>STAGES SB20</h1>
+      <div id="connStatus" class="status-badge">
+        <span class="status-dot"></span>
+        <span id="connText">Simulator Mode</span>
+      </div>
+    </div>
+    <button id="btnConnect" class="btn-connect">Connect SB20</button>
+  </header>
+
+  <!-- Row 1: Dedicated Gear Box -->
+  <section class="card">
+    <div id="gearModeLabel" class="section-label">DREAM DRIVE GEAR (1–50)</div>
+    <div class="gear-row">
+      <!-- Down Shift Column -->
+      <div class="shift-col">
+        <button id="btnShiftDown" class="btn-shift-main" aria-label="Shift Down">−</button>
+        <button id="btnJumpDown" class="btn-shift-jump">−5</button>
+      </div>
+
+      <!-- Center Readout -->
+      <div class="gear-display-center">
+        <div id="gearDisplay" class="gear-number">20</div>
+        <div id="gearSubLabel" class="gear-sub">of 50</div>
+      </div>
+
+      <!-- Up Shift Column -->
+      <div class="shift-col">
+        <button id="btnShiftUp" class="btn-shift-main up" aria-label="Shift Up">+</button>
+        <button id="btnJumpUp" class="btn-shift-jump">+5</button>
+      </div>
+    </div>
+
+    <!-- Optional Chainring Toggle (Shown only in 2x12 mode) -->
+    <div id="chainringRow" class="chainring-row">
+      <button id="btnRing1" class="btn-ring">Small Ring (34T)</button>
+      <button id="btnRing2" class="btn-ring active">Big Ring (50T)</button>
+    </div>
+
+    <div class="gear-bar-bg">
+      <div id="gearBarFill" class="gear-bar-fill"></div>
+    </div>
+  </section>
+
+  <!-- Row 2: Dedicated Elapsed Time Box -->
+  <section class="card">
+    <div class="section-label">ELAPSED RIDE TIME</div>
+    <div class="timer-layout">
+      <div id="timerDisplay" class="timer-readout">00:00</div>
+      <div class="timer-controls">
+        <button id="btnTimerToggle" class="btn-timer-main">START</button>
+        <button id="btnTimerReset" class="btn-timer-reset">RESET</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Row 3: Power, Cadence, Speed -->
+  <section class="telemetry-grid">
+    <div class="metric-box">
+      <div class="metric-label">POWER</div>
+      <div id="valPower" class="metric-value val-power">0</div>
+      <div class="metric-unit">WATTS</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-label">CADENCE</div>
+      <div id="valCadence" class="metric-value val-cadence">0</div>
+      <div class="metric-unit">RPM</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-label">SPEED</div>
+      <div id="valSpeed" class="metric-value val-speed">0.0</div>
+      <div class="metric-unit">KM/H</div>
+    </div>
+  </section>
+
+  <!-- Row 4: Advanced Checkbox & Hidden Area -->
+  <label class="advanced-toggle-bar">
+    <input type="checkbox" id="chkAdvanced">
+    <span>Show Advanced Data &amp; Simulator Settings</span>
+  </label>
+
+  <section id="advancedPanel" class="advanced-panel">
+    <div class="adv-row">
+      <span><strong>Drivetrain Mode:</strong></span>
+      <div>
+        <button id="btnModeDream" class="btn-small active">Dream Drive (1×50)</button>
+        <button id="btnMode2x12" class="btn-small">Road (2×12)</button>
+      </div>
+    </div>
+
+    <div class="adv-row">
+      <span>Gear Ratio: <strong id="advRatio">2.55</strong></span>
+      <span>Target Brake Load: <strong id="advResistance">38%</strong></span>
+      <span>Teeth: <strong id="advTeeth">Virtual</strong></span>
+    </div>
+
+    <hr style="border-color: #1e293b;">
+
+    <div class="slider-wrap">
+      <label for="simCadenceSlider">
+        <strong>Simulator Rider Cadence:</strong> <span id="simCadenceVal">85</span> RPM
+      </label>
+      <input type="range" id="simCadenceSlider" min="0" max="130" value="85">
+    </div>
+
+    <div class="adv-row">
+      <span><strong>Test Physical Handlebar Shifters:</strong></span>
+      <div>
+        <button id="btnSimBarDown" class="btn-small">👈 Bar Shift −</button>
+        <button id="btnSimBarUp" class="btn-small">👉 Bar Shift +</button>
+      </div>
+    </div>
+
+    <div>
+      <div style="margin-bottom: 6px; font-size: 0.85rem; color: var(--muted);">
+        <strong>BLE FTMS &amp; Shifter Log:</strong>
+      </div>
+      <div id="bleLog" class="log-box">Ready. Running in Simulator Mode.</div>
+    </div>
+  </section>
+
+  <script>
+    // --- App State (Dream Drive is default) ---
+    const state = {
+      mode: 'dream',          // 'dream' (1x50) or '2x12'
+      dreamGear: 20,          // 1 to 50
+      frontRing: 2,           // 1 (34T) or 2 (50T)
+      rearCog: 6,             // 1 to 12
+      chainrings: [34, 50],
+      cassette: [30, 28, 25, 23, 21, 19, 17, 15, 14, 13, 12, 11],
+      timerRunning: false,
+      elapsedSeconds: 0,
+      connected: false,
+      simCadence: 85,
+      livePower: 0,
+      liveCadence: 0,
+      liveSpeed: 0,
+      ftmsControlPoint: null
+    };
+
+    // --- DOM Elements ---
+    const el = {
+      connStatus: document.getElementById('connStatus'),
+      connText: document.getElementById('connText'),
+      btnConnect: document.getElementById('btnConnect'),
+      gearModeLabel: document.getElementById('gearModeLabel'),
+      gearDisplay: document.getElementById('gearDisplay'),
+      gearSubLabel: document.getElementById('gearSubLabel'),
+      gearBarFill: document.getElementById('gearBarFill'),
+      chainringRow: document.getElementById('chainringRow'),
+      btnRing1: document.getElementById('btnRing1'),
+      btnRing2: document.getElementById('btnRing2'),
+      btnShiftDown: document.getElementById('btnShiftDown'),
+      btnShiftUp: document.getElementById('btnShiftUp'),
+      btnJumpDown: document.getElementById('btnJumpDown'),
+      btnJumpUp: document.getElementById('btnJumpUp'),
+      timerDisplay: document.getElementById('timerDisplay'),
+      btnTimerToggle: document.getElementById('btnTimerToggle'),
+      btnTimerReset: document.getElementById('btnTimerReset'),
+      valPower: document.getElementById('valPower'),
+      valCadence: document.getElementById('valCadence'),
+      valSpeed: document.getElementById('valSpeed'),
+      chkAdvanced: document.getElementById('chkAdvanced'),
+      advancedPanel: document.getElementById('advancedPanel'),
+      btnModeDream: document.getElementById('btnModeDream'),
+      btnMode2x12: document.getElementById('btnMode2x12'),
+      advRatio: document.getElementById('advRatio'),
+      advResistance: document.getElementById('advResistance'),
+      advTeeth: document.getElementById('advTeeth'),
+      simCadenceSlider: document.getElementById('simCadenceSlider'),
+      simCadenceVal: document.getElementById('simCadenceVal'),
+      btnSimBarDown: document.getElementById('btnSimBarDown'),
+      btnSimBarUp: document.getElementById('btnSimBarUp'),
+      bleLog: document.getElementById('bleLog')
+    };
+
+    function logMsg(msg) {
+      const time = new Date().toLocaleTimeString();
+      el.bleLog.textContent = `[${time}] ${msg}\n` + el.bleLog.textContent.slice(0, 1200);
+    }
+
+    // --- Drivetrain Math ---
+    function computeGearMetrics() {
+      if (state.mode === 'dream') {
+        // Dream Drive: 50 evenly spaced virtual ratios from 1.10 to 4.60
+        const minR = 1.10;
+        const maxR = 4.60;
+        const norm = (state.dreamGear - 1) / 49;
+        const ratio = minR + norm * (maxR - minR);
+        const resistancePct = Math.round(10 + norm * 75);
+        return {
+          ratio: ratio.toFixed(2),
+          resistancePct,
+          progressPct: Math.round(((state.dreamGear) / 50) * 100),
+          teethText: `Virtual ${state.dreamGear}/50`
+        };
+      } else {
+        const frontTeeth = state.chainrings[state.frontRing - 1];
+        const rearTeeth = state.cassette[state.rearCog - 1];
+        const ratio = frontTeeth / rearTeeth;
+        const minR = 34 / 30;
+        const maxR = 50 / 11;
+        const norm = Math.max(0, Math.min(1, (ratio - minR) / (maxR - minR)));
+        const resistancePct = Math.round(10 + norm * 75);
+        return {
+          ratio: ratio.toFixed(2),
+          resistancePct,
+          progressPct: Math.round((state.rearCog / 12) * 100),
+          teethText: `${frontTeeth}×${rearTeeth}T`
+        };
+      }
+    }
+
+    // --- UI Rendering ---
+    function renderUI() {
+      const metrics = computeGearMetrics();
+
+      if (state.mode === 'dream') {
+        el.gearModeLabel.textContent = 'DREAM DRIVE GEAR (1–50)';
+        el.gearDisplay.textContent = state.dreamGear;
+        el.gearSubLabel.textContent = 'of 50';
+        el.chainringRow.style.display = 'none';
+        el.btnJumpDown.textContent = '−5';
+        el.btnJumpUp.textContent = '+5';
+      } else {
+        el.gearModeLabel.textContent = 'ROAD 2×12 GEAR';
+        el.gearDisplay.textContent = `${state.frontRing}-${state.rearCog}`;
+        el.gearSubLabel.textContent = metrics.teethText;
+        el.chainringRow.style.display = 'grid';
+        el.btnRing1.classList.toggle('active', state.frontRing === 1);
+        el.btnRing2.classList.toggle('active', state.frontRing === 2);
+        el.btnJumpDown.textContent = '−3';
+        el.btnJumpUp.textContent = '+3';
+      }
+
+      el.gearBarFill.style.width = `${metrics.progressPct}%`;
+      el.advRatio.textContent = metrics.ratio;
+      el.advResistance.textContent = `${metrics.resistancePct}%`;
+      el.advTeeth.textContent = metrics.teethText;
+
+      el.btnModeDream.classList.toggle('active', state.mode === 'dream');
+      el.btnMode2x12.classList.toggle('active', state.mode === '2x12');
+    }
+
+    // --- Shifting Controls ---
+    function shiftGear(delta) {
+      if (state.mode === 'dream') {
+        state.dreamGear = Math.max(1, Math.min(50, state.dreamGear + delta));
+      } else {
+        state.rearCog = Math.max(1, Math.min(12, state.rearCog + delta));
+      }
+      renderUI();
+      sendGearToBike();
+    }
+
+    el.btnShiftDown.addEventListener('click', () => shiftGear(-1));
+    el.btnShiftUp.addEventListener('click', () => shiftGear(1));
+    el.btnJumpDown.addEventListener('click', () => shiftGear(state.mode === 'dream' ? -5 : -3));
+    el.btnJumpUp.addEventListener('click', () => shiftGear(state.mode === 'dream' ? 5 : 3));
+
+    el.btnRing1.addEventListener('click', () => {
+      state.frontRing = 1;
+      renderUI();
+      sendGearToBike();
+    });
+
+    el.btnRing2.addEventListener('click', () => {
+      state.frontRing = 2;
+      renderUI();
+      sendGearToBike();
+    });
+
+    // --- Elapsed Time Controls ---
+    function formatElapsedTime(sec) {
+      const hrs = Math.floor(sec / 3600);
+      const mins = Math.floor((sec % 3600) / 60);
+      const secs = sec % 60;
+      const mm = String(mins).padStart(2, '0');
+      const ss = String(secs).padStart(2, '0');
+      return hrs > 0 ? `${String(hrs).padStart(2, '0')}:${mm}:${ss}` : `${mm}:${ss}`;
+    }
+
+    function renderTimerUI() {
+      el.timerDisplay.textContent = formatElapsedTime(state.elapsedSeconds);
+      if (state.timerRunning) {
+   
