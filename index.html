@@ -12,7 +12,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* Complete self-contained fallback CSS so the app works 100% even if external CDN is slow or blocked */
     *, *::before, *::after { box-sizing: border-box; }
     html, body {
       margin: 0;
@@ -203,7 +202,7 @@
         </div>
       </div>
 
-      <!-- High-Visibility In-Page Notification & BLE Status Banner (Hidden until triggered) -->
+      <!-- High-Visibility In-Page Notification & BLE Status Banner -->
       <div id="toastBanner" class="hidden card-box bg-slate-900 border-2 border-cyan-400 text-slate-100 rounded-2xl px-4 py-3 text-xs sm:text-sm" style="display:none;border-color:#22d3ee;background:#0f172a;">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;">
           <span id="toastMessage" style="font-weight:600;line-height:1.4;">Ready.</span>
@@ -234,7 +233,7 @@
           <div class="inner-box bg-slate-950 border-2 border-cyan-500/40 rounded-2xl px-5 py-4 text-center">
             <div class="flex items-center justify-between mb-1" style="display:flex;justify-content:space-between;align-items:center;">
               <span id="rearCardTitle" class="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-cyan-300" style="color:#67e8f9;font-weight:800;text-transform:uppercase;">Dream Drive Gear</span>
-              <span id="rearTeethLabel" class="mono text-xs sm:text-sm font-bold text-slate-400" style="color:#94a3b8;font-weight:700;">Gear 20 of 50</span>
+              <span id="rearTeethLabel" class="mono text-xs sm:text-sm font-bold text-slate-400" style="color:#94a3b8;font-weight:700;">Gear 20 of 50 • +2.0% Grade</span>
             </div>
             <div id="rearGearValue" class="mono giant-gear-num text-7xl sm:text-8xl font-black text-cyan-400 leading-none tracking-tight my-1">20</div>
             <!-- Visual Gear Progress Bar -->
@@ -336,8 +335,33 @@
           <span id="advancedChevron" class="text-xs font-bold uppercase tracking-wider text-slate-400" style="color:#94a3b8;font-weight:700;">Hidden ▾</span>
         </div>
 
-        <!-- Hidden by default until checkbox is checked (uses both class="hidden" AND inline style="display:none") -->
+        <!-- Hidden by default until checkbox is checked -->
         <div id="advancedDetailsArea" class="hidden mt-4 pt-4 border-t border-slate-800 space-y-4" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid #1e293b;">
+
+          <!-- FTMS Brake Control Protocol Selector (Fixes SB20 Resistance Response!) -->
+          <div class="space-y-2" style="margin-bottom:1rem;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.4rem;">
+              <span class="text-xs text-slate-400 font-semibold uppercase tracking-wider">SB20 Brake Control Method (FTMS 0x2AD9)</span>
+              <span id="ftmsAckBadge" class="mono text-xs text-emerald-400 font-bold">Mode: Sim Slope (0x11)</span>
+            </div>
+            <div class="grid-3 grid grid-cols-3 gap-2">
+              <button id="ctrlModeSlopeBtn" type="button" class="btn-ble py-2.5 px-2 rounded-xl text-xs font-bold justify-center" style="justify-content:center;">
+                Sim Slope (0x11)
+              </button>
+              <button id="ctrlModeErgBtn" type="button" class="btn-secondary py-2.5 px-2 rounded-xl text-xs font-bold">
+                ERG Watts (0x05)
+              </button>
+              <button id="ctrlModeResBtn" type="button" class="btn-secondary py-2.5 px-2 rounded-xl text-xs font-bold">
+                Resistance (0x04)
+              </button>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:0.5rem;margin-top:0.4rem;">
+              <span class="text-xs text-slate-400">If Stages Link or Zwift was open, tap to re-claim bike control:</span>
+              <button id="reclaimControlBtn" type="button" class="btn-secondary text-xs px-3 py-1.5" style="min-height:36px;">
+                🔑 Re-Unlock SB20 Brake
+              </button>
+            </div>
+          </div>
 
           <!-- Drivetrain Setup Selector -->
           <div class="space-y-2" style="margin-bottom:1rem;">
@@ -362,7 +386,7 @@
                 <span id="telemetrySourceBadge" class="font-semibold uppercase px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">Sim Pedaling</span>
                 <span id="powerZoneLabel" class="text-slate-400 font-medium">Watts (Endurance Z2)</span>
               </div>
-              <span id="effortPercentLabel" class="mono text-cyan-300 font-semibold">Target Resistance Load: 41%</span>
+              <span id="effortPercentLabel" class="mono text-cyan-300 font-semibold">Target Load: +2.0% Grade (175W)</span>
             </div>
 
             <div class="flex items-center justify-between text-xs" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
@@ -399,7 +423,7 @@
               <span class="text-xs font-bold uppercase tracking-wider text-slate-400">BLE Command &amp; Event Log</span>
               <button id="clearLogBtn" type="button" class="btn-secondary text-xs text-slate-300 hover:text-white" style="min-height:30px;padding:0.25rem 0.6rem;">Clear</button>
             </div>
-            <div id="bleLogBox" class="mono text-[11px] text-slate-300 bg-slate-900 rounded-xl p-2.5 h-24 overflow-y-auto space-y-1 border border-slate-800" style="max-height:110px;overflow-y:auto;background:#0f172a;padding:0.5rem;border-radius:0.5rem;font-size:0.75rem;">
+            <div id="bleLogBox" class="mono text-[11px] text-slate-300 bg-slate-900 rounded-xl p-2.5 h-24 overflow-y-auto space-y-1 border border-slate-800" style="max-height:130px;overflow-y:auto;background:#0f172a;padding:0.5rem;border-radius:0.5rem;font-size:0.75rem;">
             </div>
           </div>
 
@@ -410,7 +434,6 @@
   </div>
 
   <script>
-    // Helper to guarantee show/hide works even without external CSS libraries
     function setElementVisible(el, visible, displayType) {
       if (!el) return;
       if (visible) {
@@ -423,15 +446,16 @@
     }
 
     // =========================================================================
-    // PART 1: APP STATE (Dream Drive 1x50 is default + Elapsed Ride Timer)
+    // PART 1: APP STATE
     // =========================================================================
     const COGS_12_SPEED = [30, 27, 24, 21, 19, 17, 16, 15, 14, 13, 12, 11];
     const FRONT_RINGS = [34, 50];
 
     const state = {
-      mode: 'dream',         // 'dream' (Stages Dream Drive 1x50 default) or '2x12'
-      frontGear: 2,          // 1 (34T) or 2 (50T) when in 2x12 mode
-      rearGear: 20,          // Starts at Gear 20 of 50 in Dream Drive
+      mode: 'dream',          // 'dream' (1x50 default) or '2x12'
+      controlMode: 'slope',   // 'slope' (FTMS 0x11 Sim Grade - default), 'erg' (FTMS 0x05 Target Power), or 'res' (FTMS 0x04 Resistance)
+      frontGear: 2,
+      rearGear: 20,           // Starts at Gear 20 of 50
       soundEnabled: true,
       bleConnected: false,
       bleDeviceName: null,
@@ -443,7 +467,8 @@
       liveSpeedKmh: 26.8,
       customGearChar: null,
       timerRunning: false,
-      elapsedSeconds: 0
+      elapsedSeconds: 0,
+      bleWriteBusy: false
     };
 
     let audioCtx = null;
@@ -471,7 +496,7 @@
         osc.start();
         osc.stop(audioCtx.currentTime + 0.05);
       } catch (err) {
-        // Ignore audio errors if blocked by browser policy
+        // Ignore audio errors
       }
     }
 
@@ -508,24 +533,35 @@
     }
 
     // =========================================================================
-    // PART 3: GEAR MATH & BLUETOOTH COMMAND CALCULATION
+    // PART 3: GEAR MATH & FTMS RESISTANCE / SLOPE / ERG PAYLOADS
     // =========================================================================
     function computeGearMetrics() {
+      let norm = 0;
+      let frontTeeth = 50;
+      let rearTeeth = null;
+      let ratio = '2.46';
+
       if (state.mode === '2x12') {
-        const frontTeeth = FRONT_RINGS[state.frontGear - 1];
-        const rearTeeth = COGS_12_SPEED[state.rearGear - 1];
-        const ratio = (frontTeeth / rearTeeth).toFixed(2);
+        frontTeeth = FRONT_RINGS[state.frontGear - 1];
+        rearTeeth = COGS_12_SPEED[state.rearGear - 1];
+        ratio = (frontTeeth / rearTeeth).toFixed(2);
         const minRatio = 34 / 30;
         const maxRatio = 50 / 11;
-        const norm = (frontTeeth / rearTeeth - minRatio) / (maxRatio - minRatio);
-        const resistancePct = Math.round(12 + norm * 73);
-        return { frontTeeth, rearTeeth, ratio, resistancePct };
+        norm = Math.max(0, Math.min(1, (frontTeeth / rearTeeth - minRatio) / (maxRatio - minRatio)));
       } else {
-        const norm = (state.rearGear - 1) / 49;
-        const ratio = (1.10 + norm * 3.50).toFixed(2);
-        const resistancePct = Math.round(10 + norm * 80);
-        return { frontTeeth: 50, rearTeeth: null, ratio, resistancePct };
+        // Dream Drive 1-50
+        norm = Math.max(0, Math.min(1, (state.rearGear - 1) / 49));
+        ratio = (1.10 + norm * 3.50).toFixed(2);
       }
+
+      // 1. Target Resistance Level (1 to 100%)
+      const resistancePct = Math.round(5 + norm * 95);
+      // 2. Simulated Grade / Slope (-2.0% to +14.0%) for FTMS 0x11
+      const gradePct = +(-2.0 + norm * 16.0).toFixed(1);
+      // 3. Target ERG Power (60W to 420W) for FTMS 0x05
+      const targetWatts = Math.round(60 + norm * 360);
+
+      return { frontTeeth, rearTeeth, ratio, resistancePct, gradePct, targetWatts };
     }
 
     function appendLog(message) {
@@ -546,23 +582,125 @@
       setElementVisible(banner, true, 'block');
     }
 
-    async function sendGearToBike() {
-      const metrics = computeGearMetrics();
-      const payloadHex = `0x04, 0x${metrics.resistancePct.toString(16).padStart(2, '0').toUpperCase()}`;
+    // Helper that uses writeValueWithResponse when supported by Chrome Android
+    async function writeControlBytes(characteristic, uint8Bytes) {
+      if (!characteristic) return;
+      if (typeof characteristic.writeValueWithResponse === 'function') {
+        await characteristic.writeValueWithResponse(uint8Bytes);
+      } else {
+        await characteristic.writeValue(uint8Bytes);
+      }
+    }
 
-      if (state.bleConnected && state.ftmsControlPoint) {
-        try {
-          const data = new Uint8Array([0x04, metrics.resistancePct]);
-          await state.ftmsControlPoint.writeValue(data);
-          appendLog(`BLE Write (0x2AD9) → [${payloadHex}] (Load ${metrics.resistancePct}%)`);
-        } catch (err) {
-          appendLog(`BLE Write Error: ${err.message}`);
+    // Unlocks FTMS Control Point (0x2AD9): enables Indications, sends 0x00 (Request Control) + 0x07 (Start/Resume)
+    async function unlockFtmsControlPoint(controlPoint) {
+      if (!controlPoint) return;
+      try {
+        // Step A: FTMS requires enabling Indications on 0x2AD9 BEFORE writing commands!
+        await controlPoint.startNotifications();
+        controlPoint.addEventListener('characteristicvaluechanged', handleFtmsControlPointResponse);
+        appendLog('Enabled 0x2AD9 Control Point Indications.');
+      } catch (indErr) {
+        appendLog(`0x2AD9 Indication note: ${indErr.message}`);
+      }
+
+      try {
+        // Step B: OpCode 0x00 = Request Control
+        await writeControlBytes(controlPoint, new Uint8Array([0x00]));
+        appendLog('Sent 0x00 (Request Control) to SB20.');
+        await new Promise(r => setTimeout(r, 180));
+
+        // Step C: OpCode 0x07 = Start or Resume Workout
+        await writeControlBytes(controlPoint, new Uint8Array([0x07]));
+        appendLog('Sent 0x07 (Start/Resume) to SB20.');
+        await new Promise(r => setTimeout(r, 150));
+      } catch (ctrlErr) {
+        appendLog(`Unlock error: ${ctrlErr.message}`);
+      }
+    }
+
+    // Decodes the SB20's response indication on 0x2AD9: [0x80, RequestOpCode, ResultCode]
+    function handleFtmsControlPointResponse(event) {
+      const bytes = new Uint8Array(event.target.value.buffer);
+      const hexStr = formatPacketHex(bytes);
+      if (bytes.length >= 3 && bytes[0] === 0x80) {
+        const reqOp = bytes[1];
+        const resCode = bytes[2];
+        const resNames = {
+          0x01: 'SUCCESS ✅',
+          0x02: 'OpCode Not Supported',
+          0x03: 'Invalid Parameter',
+          0x04: 'Operation Failed',
+          0x05: 'Control Not Permitted (Close Stages Link/Zwift!)'
+        };
+        const statusText = resNames[resCode] || `Code 0x${resCode.toString(16)}`;
+        appendLog(`SB20 0x2AD9 Reply (Op 0x${reqOp.toString(16).padStart(2, '0')}): ${statusText}`);
+        const badge = document.getElementById('ftmsAckBadge');
+        if (badge) {
+          badge.textContent = `SB20 Reply: ${statusText}`;
+          badge.style.color = resCode === 0x01 ? '#34d399' : '#fbbf24';
+        }
+
+        // If Control Not Permitted (0x05), automatically re-request control (0x00)
+        if (resCode === 0x05 && state.ftmsControlPoint) {
+          showToast('SB20 reported "Control Not Permitted" — make sure Stages Link or Zwift is closed on your phone, then tap Re-Unlock SB20 Brake in Advanced.');
         }
       } else {
-        const gearTag = state.mode === '2x12'
-          ? `Gear ${state.frontGear}-${state.rearGear} (${metrics.frontTeeth}×${metrics.rearTeeth}T)`
-          : `Dream Drive Gear ${state.rearGear}/50`;
-        appendLog(`${gearTag} → Payload [${payloadHex}] (${metrics.resistancePct}% load)`);
+        appendLog(`SB20 0x2AD9 Notify: ${hexStr}`);
+      }
+    }
+
+    // Sends the active gear's load to the Stages SB20 over FTMS 0x2AD9
+    async function sendGearToBike() {
+      const metrics = computeGearMetrics();
+
+      // Build FTMS packets for all 3 standard methods:
+      // 1) OpCode 0x11: Set Indoor Bike Simulation Parameters (7 bytes)
+      //    [0x11, windLo, windHi, gradeLo, gradeHi, crr(40), cw(51)]
+      //    grade is sint16 in 0.01% units (e.g. +2.0% = 200)
+      const gradeUnits = Math.round(metrics.gradePct * 100);
+      const simBuffer = new ArrayBuffer(7);
+      const simView = new DataView(simBuffer);
+      simView.setUint8(0, 0x11);
+      simView.setInt16(1, 0, true);          // Wind speed = 0
+      simView.setInt16(3, gradeUnits, true); // Grade in 0.01%
+      simView.setUint8(5, 40);               // Crr = 0.0040
+      simView.setUint8(6, 51);               // Cw = 0.51
+      const simBytes = new Uint8Array(simBuffer);
+
+      // 2) OpCode 0x05: Set Target Power / ERG (3 bytes: [0x05, wattsLo, wattsHi])
+      const ergBuffer = new ArrayBuffer(3);
+      const ergView = new DataView(ergBuffer);
+      ergView.setUint8(0, 0x05);
+      ergView.setInt16(1, metrics.targetWatts, true);
+      const ergBytes = new Uint8Array(ergBuffer);
+
+      // 3) OpCode 0x04: Set Target Resistance Level (2 bytes: [0x04, level])
+      const resBytes = new Uint8Array([0x04, metrics.resistancePct]);
+
+      let chosenBytes = simBytes;
+      let modeDesc = `Sim Slope ${metrics.gradePct >= 0 ? '+' : ''}${metrics.gradePct}% (0x11)`;
+      if (state.controlMode === 'erg') {
+        chosenBytes = ergBytes;
+        modeDesc = `ERG ${metrics.targetWatts}W (0x05)`;
+      } else if (state.controlMode === 'res') {
+        chosenBytes = resBytes;
+        modeDesc = `Resistance ${metrics.resistancePct}% (0x04)`;
+      }
+
+      if (state.bleConnected && state.ftmsControlPoint) {
+        if (state.bleWriteBusy) return;
+        state.bleWriteBusy = true;
+        try {
+          await writeControlBytes(state.ftmsControlPoint, chosenBytes);
+          appendLog(`Sent ${modeDesc} → ${formatPacketHex(chosenBytes)}`);
+        } catch (err) {
+          appendLog(`BLE Write Error: ${err.message}`);
+        } finally {
+          state.bleWriteBusy = false;
+        }
+      } else {
+        appendLog(`Gear ${state.rearGear} → ${modeDesc} ${formatPacketHex(chosenBytes)}`);
       }
     }
 
@@ -605,7 +743,7 @@
           renderUI();
           updateSimulatedTelemetry();
         }
-        appendLog(`${sourceName} Notify (${uint8Data.length}B) → ${hexStr} (Synced Gear ${state.rearGear})`);
+        appendLog(`${sourceName} Notify (${uint8Data.length}B) → ${hexStr}`);
       }
     }
 
@@ -704,6 +842,20 @@
       const effortPercentLabel = document.getElementById('effortPercentLabel');
       const cassetteBar = document.getElementById('cassetteBar');
 
+      // Highlight active FTMS Brake Control Method button
+      const slopeBtn = document.getElementById('ctrlModeSlopeBtn');
+      const ergBtn = document.getElementById('ctrlModeErgBtn');
+      const resBtn = document.getElementById('ctrlModeResBtn');
+      if (slopeBtn && ergBtn && resBtn) {
+        slopeBtn.className = state.controlMode === 'slope' ? 'btn-ble py-2.5 px-2 rounded-xl text-xs font-bold justify-center' : 'btn-secondary py-2.5 px-2 rounded-xl text-xs font-bold';
+        ergBtn.className = state.controlMode === 'erg' ? 'btn-ble py-2.5 px-2 rounded-xl text-xs font-bold justify-center' : 'btn-secondary py-2.5 px-2 rounded-xl text-xs font-bold';
+        resBtn.className = state.controlMode === 'res' ? 'btn-ble py-2.5 px-2 rounded-xl text-xs font-bold justify-center' : 'btn-secondary py-2.5 px-2 rounded-xl text-xs font-bold';
+      }
+
+      let loadSummary = `${metrics.gradePct >= 0 ? '+' : ''}${metrics.gradePct}% Grade`;
+      if (state.controlMode === 'erg') loadSummary = `${metrics.targetWatts}W Target`;
+      if (state.controlMode === 'res') loadSummary = `${metrics.resistancePct}% Load`;
+
       if (state.mode === '2x12') {
         mode2x12Btn.className = 'btn-ble py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition bg-cyan-500 text-slate-950 shadow';
         modeDreamBtn.className = 'btn-secondary py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-400 hover:text-white';
@@ -720,7 +872,7 @@
 
         rearCardTitle.textContent = 'Rear Cog';
         rearGearValue.textContent = String(state.rearGear);
-        rearTeethLabel.textContent = `Cog ${state.rearGear}/12 (${metrics.rearTeeth}T)`;
+        rearTeethLabel.textContent = `Cog ${state.rearGear}/12 (${metrics.rearTeeth}T) • ${loadSummary}`;
 
         cassetteBar.style.gridTemplateColumns = 'repeat(12, minmax(0, 1fr))';
         cassetteBar.innerHTML = '';
@@ -731,7 +883,6 @@
           cassetteBar.appendChild(cell);
         }
       } else {
-        // Dream Drive 1x50 Mode (Default)
         modeDreamBtn.className = 'btn-ble py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition bg-cyan-500 text-slate-950 shadow';
         mode2x12Btn.className = 'btn-secondary py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-400 hover:text-white';
 
@@ -744,7 +895,7 @@
 
         rearCardTitle.textContent = 'Dream Drive Gear';
         rearGearValue.textContent = String(state.rearGear);
-        rearTeethLabel.textContent = `Gear ${state.rearGear} of 50`;
+        rearTeethLabel.textContent = `Gear ${state.rearGear} of 50 • ${loadSummary}`;
 
         cassetteBar.style.gridTemplateColumns = 'repeat(10, minmax(0, 1fr))';
         cassetteBar.innerHTML = '';
@@ -757,7 +908,7 @@
         }
       }
 
-      effortPercentLabel.textContent = `Target Resistance Load: ${metrics.resistancePct}%`;
+      effortPercentLabel.textContent = `Target Load: ${metrics.gradePct >= 0 ? '+' : ''}${metrics.gradePct}% Grade | ${metrics.targetWatts}W | ${metrics.resistancePct}%`;
     }
 
     // =========================================================================
@@ -798,7 +949,7 @@
       if (!navigator.bluetooth) {
         if (btnText) btnText.textContent = 'Connect SB20';
         if (connLabel) connLabel.textContent = 'Web Bluetooth unavailable in this browser';
-        showToast('Bluetooth requires Chrome on Android opened via your https://.github.io link (not GitHub code view or Samsung/in-app browser).');
+        showToast('Bluetooth requires Chrome on Android opened via your https://.github.io link.');
         appendLog('navigator.bluetooth is undefined in this browser.');
         return;
       }
@@ -828,9 +979,7 @@
         const server = await device.gatt.connect();
         const service = await server.getPrimaryService(0x1826);
 
-        const controlPoint = await service.getCharacteristic(0x2ad9);
-        await controlPoint.writeValue(new Uint8Array([0x00]));
-
+        // 1. Subscribe to 0x2AD2 (Indoor Bike Data) for live Power, Cadence, Speed
         try {
           const bikeDataChar = await service.getCharacteristic(0x2ad2);
           await bikeDataChar.startNotifications();
@@ -840,36 +989,22 @@
           appendLog(`0x2AD2 notice: ${telemetryErr.message}`);
         }
 
-        try {
-          const allServices = await server.getPrimaryServices();
-          for (const svc of allServices) {
-            if (svc.uuid.includes('1826') || svc.uuid.includes('180a')) continue;
-            const chars = await svc.getCharacteristics();
-            for (const ch of chars) {
-              if (ch.properties.notify) {
-                await ch.startNotifications();
-                ch.addEventListener('characteristicvaluechanged', (ev) => {
-                  const bytes = new Uint8Array(ev.target.value.buffer);
-                  handleSb20GearNotification(bytes, 'SB20 Handlebar BLE');
-                });
-                state.customGearChar = ch;
-                appendLog(`Subscribed to SB20 Custom Gear Notify (${ch.uuid.slice(0, 8)}...).`);
-              }
-            }
-          }
-        } catch (scanErr) {
-          appendLog(`Custom shifter scan note: ${scanErr.message}`);
-        }
+        // 2. Get 0x2AD9 (Fitness Machine Control Point) & properly unlock with Indications + 0x00 + 0x07
+        const controlPoint = await service.getCharacteristic(0x2ad9);
+        state.ftmsControlPoint = controlPoint;
+        await unlockFtmsControlPoint(controlPoint);
 
         state.bleConnected = true;
         state.bleDeviceName = device.name || 'Stages SB20';
-        state.ftmsControlPoint = controlPoint;
         document.getElementById('telemetrySourceBadge').textContent = 'Live BLE Stream';
 
         document.getElementById('statusDot').style.background = '#34d399';
         connLabel.textContent = `Connected to ${state.bleDeviceName}`;
         btnText.textContent = 'Connected';
-        showToast(`Paired with ${state.bleDeviceName}! Shifting now sends live FTMS commands.`);
+        showToast(`Connected & unlocked ${state.bleDeviceName} brake! Try shifting up/down now.`);
+
+        // Send initial gear load immediately after unlocking
+        await sendGearToBike();
 
         device.addEventListener('gattserverdisconnected', () => {
           state.bleConnected = false;
@@ -888,7 +1023,7 @@
     }
 
     // =========================================================================
-    // PART 7: WIRE UP BUTTON LISTENERS (Runs immediately or on DOMContentLoaded)
+    // PART 7: WIRE UP BUTTON LISTENERS
     // =========================================================================
     let appInitialized = false;
     function initApp() {
@@ -930,7 +1065,39 @@
         appendLog('Ride timer reset to 00:00.');
       });
 
-      // Advanced Checkbox & Row Listener (works with or without external CSS)
+      // FTMS Control Mode Selector Listeners (Slope 0x11 vs ERG 0x05 vs Resistance 0x04)
+      document.getElementById('ctrlModeSlopeBtn').addEventListener('click', () => {
+        state.controlMode = 'slope';
+        document.getElementById('ftmsAckBadge').textContent = 'Mode: Sim Slope (0x11)';
+        renderUI();
+        sendGearToBike();
+      });
+
+      document.getElementById('ctrlModeErgBtn').addEventListener('click', () => {
+        state.controlMode = 'erg';
+        document.getElementById('ftmsAckBadge').textContent = 'Mode: ERG Watts (0x05)';
+        renderUI();
+        sendGearToBike();
+      });
+
+      document.getElementById('ctrlModeResBtn').addEventListener('click', () => {
+        state.controlMode = 'res';
+        document.getElementById('ftmsAckBadge').textContent = 'Mode: Resistance (0x04)';
+        renderUI();
+        sendGearToBike();
+      });
+
+      document.getElementById('reclaimControlBtn').addEventListener('click', async () => {
+        if (state.bleConnected && state.ftmsControlPoint) {
+          await unlockFtmsControlPoint(state.ftmsControlPoint);
+          await sendGearToBike();
+          showToast('Sent Request Control (0x00) + Start (0x07) to SB20 brake.');
+        } else {
+          showToast('Connect to your SB20 first before unlocking brake control.');
+        }
+      });
+
+      // Advanced Checkbox & Row Listener
       const advCheckbox = document.getElementById('advancedToggleCheckbox');
       const advArea = document.getElementById('advancedDetailsArea');
       const advChevron = document.getElementById('advancedChevron');
@@ -1044,7 +1211,7 @@
       renderUI();
       renderTimerUI();
       updateSimulatedTelemetry();
-      appendLog('Dream Drive (Gear 20/50) & Ride Timer ready.');
+      appendLog('FTMS 0x2AD9 Full Handshake (Indications + 0x00 + 0x07 + Sim/ERG/Res) ready.');
     }
 
     if (document.readyState === 'loading') {
