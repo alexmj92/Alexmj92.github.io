@@ -1,716 +1,1057 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#0f172a">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <title>Stages SB20 Cockpit</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Stages SB20 Cockpit — Dream Drive &amp; Ride Timer</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #090d16;
-      --card: #131c2e;
-      --card-border: #23314d;
-      --text: #f8fafc;
-      --muted: #94a3b8;
-      --primary: #3b82f6;
-      --primary-active: #2563eb;
-      --green: #10b981;
-      --green-active: #059669;
-      --amber: #f59e0b;
-      --red: #ef4444;
-      --cyan: #06b6d4;
-    }
-
-    * {
-      box-sizing: border-box;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-tap-highlight-color: transparent;
+    /* Complete self-contained fallback CSS so the app works 100% even if external CDN is slow or blocked */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body {
       margin: 0;
       padding: 0;
-    }
-
-    body {
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      padding: 12px;
-      max-width: 700px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      background-color: #020617;
+      color: #f1f5f9;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
       min-height: 100vh;
     }
-
-    /* Header Bar */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 12px 16px;
+    .mono {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
     }
-
-    .title-group h1 {
-      font-size: 1.25rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
+    .hidden {
+      display: none !important;
     }
-
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.85rem;
-      color: var(--amber);
-      font-weight: 600;
-      margin-top: 2px;
+    .sr-only {
+      position: absolute !important;
+      width: 1px !important;
+      height: 1px !important;
+      padding: 0 !important;
+      margin: -1px !important;
+      overflow: hidden !important;
+      clip: rect(0, 0, 0, 0) !important;
+      white-space: nowrap !important;
+      border: 0 !important;
     }
-
-    .status-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--amber);
-    }
-
-    .status-connected {
-      color: var(--green);
-    }
-
-    .status-connected .status-dot {
-      background: var(--green);
-      box-shadow: 0 0 8px var(--green);
-    }
-
-    .btn-connect {
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: 10px;
-      padding: 12px 20px;
-      font-size: 1rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .btn-connect:active {
-      background: var(--primary-active);
-    }
-
-    /* Main Cockpit Cards */
-    .card {
-      background: var(--card);
-      border: 2px solid var(--card-border);
-      border-radius: 18px;
-      padding: 16px;
-    }
-
-    .section-label {
-      font-size: 0.9rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: var(--muted);
-      text-align: center;
-      margin-bottom: 10px;
-    }
-
-    /* Row 1: Gear Box */
-    .gear-row {
-      display: grid;
-      grid-template-columns: 1fr 1.3fr 1fr;
-      gap: 12px;
-      align-items: center;
-    }
-
-    .shift-col {
+    .cockpit-shell {
+      max-width: 42rem;
+      width: 100%;
+      margin: 0 auto;
+      padding: 0.75rem;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 0.85rem;
     }
-
-    .btn-shift-main {
-      height: 110px;
-      border-radius: 16px;
-      border: 2px solid #334155;
-      background: #1e293b;
-      color: var(--text);
-      font-size: 3.5rem;
-      font-weight: 900;
+    .card-box {
+      background-color: #0f172a;
+      border: 2px solid #1e293b;
+      border-radius: 1.5rem;
+      padding: 1rem;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+    .inner-box {
+      background-color: #020617;
+      border: 2px solid rgba(6, 182, 212, 0.4);
+      border-radius: 1.15rem;
+      padding: 1rem;
+      text-align: center;
+    }
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.75rem;
+    }
+    .giant-gear-num {
+      font-size: 4.75rem;
       line-height: 1;
+      font-weight: 900;
+      color: #22d3ee;
+      margin: 0.25rem 0;
+    }
+    .giant-timer-num {
+      font-size: 3.5rem;
+      line-height: 1;
+      font-weight: 900;
+      color: #ffffff;
+      margin-top: 0.25rem;
+    }
+    .metric-num {
+      font-size: 2.5rem;
+      line-height: 1.05;
+      font-weight: 900;
+      color: #ffffff;
+      margin: 0.35rem 0;
+    }
+    button {
       cursor: pointer;
+      font-family: inherit;
+    }
+    .touch-btn:active, .shift-btn:active {
+      transform: scale(0.96);
+    }
+    .btn-shift-down {
+      min-height: 108px;
+      background-color: #1e293b;
+      color: #ffffff;
+      border: 2px solid #475569;
+      border-radius: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .btn-shift-up {
+      min-height: 108px;
+      background-color: #06b6d4;
+      color: #020617;
+      border: 2px solid #67e8f9;
+      border-radius: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .btn-timer-start {
+      min-height: 68px;
+      background-color: #10b981;
+      color: #020617;
+      border: none;
+      border-radius: 1rem;
+      font-weight: 900;
+      font-size: 1.125rem;
+      padding: 0.85rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: center;
-      touch-action: manipulation;
+      gap: 0.5rem;
     }
-
-    .btn-shift-main.up {
-      background: var(--primary);
-      border-color: #60a5fa;
-    }
-
-    .btn-shift-main:active {
-      transform: scale(0.97);
-      filter: brightness(1.15);
-    }
-
-    .btn-shift-jump {
-      height: 54px;
-      border-radius: 12px;
-      border: 1px solid #334155;
-      background: #0f172a;
-      color: var(--muted);
-      font-size: 1.35rem;
-      font-weight: 800;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    .btn-shift-jump:active {
-      background: #1e293b;
-      color: var(--text);
-    }
-
-    .gear-display-center {
-      text-align: center;
-      background: #090d16;
-      border: 2px solid #1e293b;
-      border-radius: 16px;
-      padding: 14px 8px;
-    }
-
-    .gear-number {
-      font-size: 5.5rem;
-      font-weight: 900;
-      line-height: 1;
-      color: var(--cyan);
-      font-variant-numeric: tabular-nums;
-    }
-
-    .gear-sub {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    /* Progress Bar inside Gear Card */
-    .gear-bar-bg {
-      width: 100%;
-      height: 10px;
-      background: #090d16;
-      border-radius: 5px;
-      margin-top: 14px;
-      overflow: hidden;
-    }
-
-    .gear-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--primary), var(--cyan));
-      width: 40%;
-      transition: width 0.15s ease-out;
-    }
-
-    /* Chainring Selector for 2x12 mode */
-    .chainring-row {
-      display: none;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 12px;
-    }
-
-    .btn-ring {
-      padding: 14px;
-      border-radius: 12px;
-      border: 2px solid #334155;
-      background: #0f172a;
-      color: var(--muted);
-      font-size: 1.1rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .btn-ring.active {
-      background: #1e3a8a;
-      border-color: #60a5fa;
-      color: white;
-    }
-
-    /* Row 2: Elapsed Time Box */
-    .timer-layout {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .timer-readout {
-      font-size: 4.25rem;
-      font-weight: 900;
-      text-align: center;
-      font-variant-numeric: tabular-nums;
-      letter-spacing: 2px;
-      background: #090d16;
-      border: 2px solid #1e293b;
-      border-radius: 14px;
-      padding: 10px;
-      line-height: 1.1;
-    }
-
-    .timer-controls {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 12px;
-    }
-
-    .btn-timer-main {
-      height: 72px;
-      border-radius: 14px;
+    .btn-timer-stop {
+      min-height: 68px;
+      background-color: #f59e0b;
+      color: #020617;
       border: none;
-      background: var(--green);
-      color: #052e16;
-      font-size: 1.75rem;
+      border-radius: 1rem;
       font-weight: 900;
-      letter-spacing: 1px;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    .btn-timer-main.running {
-      background: var(--amber);
-      color: #451a03;
-    }
-
-    .btn-timer-reset {
-      height: 72px;
-      border-radius: 14px;
-      border: 2px solid #334155;
-      background: #1e293b;
-      color: var(--text);
-      font-size: 1.35rem;
-      font-weight: 800;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    /* Row 3: Telemetry Trio */
-    .telemetry-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-    }
-
-    .metric-box {
-      background: var(--card);
-      border: 2px solid var(--card-border);
-      border-radius: 16px;
-      padding: 14px 8px;
-      text-align: center;
-    }
-
-    .metric-label {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: var(--muted);
-      letter-spacing: 1px;
-    }
-
-    .metric-value {
-      font-size: 3.1rem;
-      font-weight: 900;
-      line-height: 1.1;
-      margin: 6px 0 2px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .metric-unit {
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: var(--muted);
-    }
-
-    .val-power { color: #facc15; }
-    .val-cadence { color: #38bdf8; }
-    .val-speed { color: #4ade80; }
-
-    /* Row 4: Advanced Checkbox & Area */
-    .advanced-toggle-bar {
+      font-size: 1.125rem;
+      padding: 0.85rem 1.5rem;
       display: flex;
       align-items: center;
-      gap: 12px;
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 14px;
-      padding: 14px 16px;
-      cursor: pointer;
-      font-size: 1.05rem;
-      font-weight: 700;
-      color: var(--muted);
+      justify-content: center;
+      gap: 0.5rem;
     }
-
-    .advanced-toggle-bar input {
-      width: 24px;
-      height: 24px;
-      accent-color: var(--primary);
-    }
-
-    .advanced-panel {
-      display: none;
-      flex-direction: column;
-      gap: 14px;
-      background: var(--card);
-      border: 1px solid var(--card-border);
-      border-radius: 16px;
-      padding: 16px;
-    }
-
-    .advanced-panel.open {
-      display: flex;
-    }
-
-    .adv-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn-small {
-      padding: 10px 14px;
-      border-radius: 10px;
+    .btn-secondary {
+      min-height: 52px;
+      background-color: #1e293b;
+      color: #e2e8f0;
       border: 1px solid #334155;
-      background: #0f172a;
-      color: var(--text);
-      font-size: 0.95rem;
+      border-radius: 0.9rem;
       font-weight: 700;
-      cursor: pointer;
+      padding: 0.65rem 1rem;
     }
-
-    .btn-small.active {
-      background: var(--primary);
-      border-color: #60a5fa;
-    }
-
-    .slider-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .slider-wrap input[type="range"] {
-      width: 100%;
-      height: 28px;
-      accent-color: var(--primary);
-    }
-
-    .log-box {
-      background: #050811;
-      border: 1px solid #1e293b;
-      border-radius: 10px;
-      padding: 10px;
-      font-family: monospace;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      max-height: 150px;
-      overflow-y: auto;
-      white-space: pre-wrap;
+    .btn-ble {
+      background-color: #06b6d4;
+      color: #020617;
+      border: none;
+      border-radius: 0.85rem;
+      font-weight: 800;
+      padding: 0.65rem 1rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
     }
   </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
 
-  <!-- Top Header -->
-  <header class="header">
-    <div class="title-group">
-      <h1>STAGES SB20</h1>
-      <div id="connStatus" class="status-badge">
-        <span class="status-dot"></span>
-        <span id="connText">Simulator Mode</span>
-      </div>
-    </div>
-    <button id="btnConnect" class="btn-connect">Connect SB20</button>
-  </header>
+  <div class="cockpit-shell">
 
-  <!-- Row 1: Dedicated Gear Box -->
-  <section class="card">
-    <div id="gearModeLabel" class="section-label">DREAM DRIVE GEAR (1–50)</div>
-    <div class="gear-row">
-      <!-- Down Shift Column -->
-      <div class="shift-col">
-        <button id="btnShiftDown" class="btn-shift-main" aria-label="Shift Down">−</button>
-        <button id="btnJumpDown" class="btn-shift-jump">−5</button>
-      </div>
+    <!-- Top Connection Bar -->
+    <header class="space-y-2">
+      <div class="card-box flex flex-wrap items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3">
+        <div class="flex items-center gap-3">
+          <span id="statusDot" class="w-3.5 h-3.5 rounded-full bg-amber-400 animate-pulse shrink-0" style="display:inline-block;width:12px;height:12px;border-radius:999px;background:#fbbf24;"></span>
+          <div>
+            <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-white leading-tight" style="margin:0;">Stages SB20</h1>
+            <p id="connectionLabel" class="text-xs text-slate-400" style="margin:2px 0 0 0;color:#94a3b8;font-size:0.78rem;">Simulator Ready • Dream Drive</p>
+          </div>
+        </div>
 
-      <!-- Center Readout -->
-      <div class="gear-display-center">
-        <div id="gearDisplay" class="gear-number">20</div>
-        <div id="gearSubLabel" class="gear-sub">of 50</div>
+        <div class="flex items-center gap-2" style="display:flex;align-items:center;gap:0.5rem;">
+          <button id="soundToggleBtn" type="button" class="btn-secondary px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs sm:text-sm font-bold border border-slate-700 transition touch-btn" title="Toggle shift click sound">
+            <span id="soundIcon">🔊 Sound On</span>
+          </button>
+          <button id="connectBleBtn" type="button" class="btn-ble px-4 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-extrabold text-xs sm:text-sm transition shadow-md flex items-center gap-1.5 touch-btn">
+            <span>⚡</span>
+            <span id="connectBtnText">Connect SB20</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Up Shift Column -->
-      <div class="shift-col">
-        <button id="btnShiftUp" class="btn-shift-main up" aria-label="Shift Up">+</button>
-        <button id="btnJumpUp" class="btn-shift-jump">+5</button>
+      <!-- High-Visibility In-Page Notification & BLE Status Banner (Hidden until triggered) -->
+      <div id="toastBanner" class="hidden card-box bg-slate-900 border-2 border-cyan-400 text-slate-100 rounded-2xl px-4 py-3 text-xs sm:text-sm" style="display:none;border-color:#22d3ee;background:#0f172a;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:0.75rem;flex-wrap:wrap;">
+          <span id="toastMessage" style="font-weight:600;line-height:1.4;">Ready.</span>
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <button id="scanAllBleBtn" type="button" class="btn-secondary text-xs px-3 py-1.5 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-bold">
+              Scan All Bluetooth Devices
+            </button>
+            <button id="closeToastBtn" type="button" class="btn-secondary text-slate-300 hover:text-white font-bold px-2.5 py-1">✕</button>
+          </div>
+        </div>
       </div>
-    </div>
+    </header>
 
-    <!-- Optional Chainring Toggle (Shown only in 2x12 mode) -->
-    <div id="chainringRow" class="chainring-row">
-      <button id="btnRing1" class="btn-ring">Small Ring (34T)</button>
-      <button id="btnRing2" class="btn-ring active">Big Ring (50T)</button>
-    </div>
+    <!-- Main Touchscreen Riding Cockpit -->
+    <main class="space-y-3.5" style="display:flex;flex-direction:column;gap:0.85rem;">
 
-    <div class="gear-bar-bg">
-      <div id="gearBarFill" class="gear-bar-fill"></div>
-    </div>
-  </section>
+      <!-- ROW 1: DEDICATED FULL-WIDTH GEAR BOX + MASSIVE TOUCH SHIFTERS -->
+      <section class="card-box bg-slate-900 border-2 border-slate-800 rounded-3xl p-4 sm:p-5 space-y-4">
+        <div id="splitGearContainer" class="grid grid-cols-1 gap-3 items-center">
+          <!-- Front Ring Box (Hidden by default in Dream Drive) -->
+          <div id="frontGearCard" class="hidden inner-box bg-slate-950 border border-slate-800 rounded-2xl p-4 text-center" style="display:none;">
+            <div class="text-xs font-extrabold uppercase tracking-widest text-slate-400">Front Ring</div>
+            <div id="frontGearValue" class="mono giant-gear-num text-6xl sm:text-7xl font-black text-white leading-none my-1">2</div>
+            <div id="frontTeethLabel" class="text-sm font-bold text-emerald-400">Big Ring (50T)</div>
+          </div>
 
-  <!-- Row 2: Dedicated Elapsed Time Box -->
-  <section class="card">
-    <div class="section-label">ELAPSED RIDE TIME</div>
-    <div class="timer-layout">
-      <div id="timerDisplay" class="timer-readout">00:00</div>
-      <div class="timer-controls">
-        <button id="btnTimerToggle" class="btn-timer-main">START</button>
-        <button id="btnTimerReset" class="btn-timer-reset">RESET</button>
-      </div>
-    </div>
-  </section>
+          <!-- Primary Gear Box (Full Row to Itself in Dream Drive) -->
+          <div class="inner-box bg-slate-950 border-2 border-cyan-500/40 rounded-2xl px-5 py-4 text-center">
+            <div class="flex items-center justify-between mb-1" style="display:flex;justify-content:space-between;align-items:center;">
+              <span id="rearCardTitle" class="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-cyan-300" style="color:#67e8f9;font-weight:800;text-transform:uppercase;">Dream Drive Gear</span>
+              <span id="rearTeethLabel" class="mono text-xs sm:text-sm font-bold text-slate-400" style="color:#94a3b8;font-weight:700;">Gear 20 of 50</span>
+            </div>
+            <div id="rearGearValue" class="mono giant-gear-num text-7xl sm:text-8xl font-black text-cyan-400 leading-none tracking-tight my-1">20</div>
+            <!-- Visual Gear Progress Bar -->
+            <div id="cassetteBar" class="grid grid-cols-10 gap-1.5 h-3.5 bg-slate-900 p-1 rounded-xl border border-slate-800 mt-3" style="display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;height:14px;background:#0f172a;padding:3px;border-radius:8px;margin-top:10px;">
+            </div>
+          </div>
+        </div>
 
-  <!-- Row 3: Power, Cadence, Speed -->
-  <section class="telemetry-grid">
-    <div class="metric-box">
-      <div class="metric-label">POWER</div>
-      <div id="valPower" class="metric-value val-power">0</div>
-      <div class="metric-unit">WATTS</div>
-    </div>
-    <div class="metric-box">
-      <div class="metric-label">CADENCE</div>
-      <div id="valCadence" class="metric-value val-cadence">0</div>
-      <div class="metric-unit">RPM</div>
-    </div>
-    <div class="metric-box">
-      <div class="metric-label">SPEED</div>
-      <div id="valSpeed" class="metric-value val-speed">0.0</div>
-      <div class="metric-unit">KM/H</div>
-    </div>
-  </section>
+        <!-- Massive Touchscreen Shift Buttons -->
+        <div class="grid-2 grid grid-cols-2 gap-3.5" style="margin-top:0.85rem;">
+          <button id="rearDownBtn" type="button" class="shift-btn btn-shift-down min-h-[108px] py-5 px-4 rounded-3xl bg-slate-800 hover:bg-slate-700 border-2 border-slate-600 shadow-lg flex flex-col items-center justify-center transition">
+            <span class="mono text-5xl sm:text-6xl font-black text-white leading-none" style="font-size:3.25rem;line-height:1;font-weight:900;">−</span>
+            <span class="text-base sm:text-lg font-extrabold text-slate-100 mt-1" style="font-size:1.1rem;font-weight:800;margin-top:4px;">Shift Down</span> <span class="sr-only">Easier Gear</span>
+          </button>
 
-  <!-- Row 4: Advanced Checkbox & Hidden Area -->
-  <label class="advanced-toggle-bar">
-    <input type="checkbox" id="chkAdvanced">
-    <span>Show Advanced Data &amp; Simulator Settings</span>
-  </label>
+          <button id="rearUpBtn" type="button" class="shift-btn btn-shift-up min-h-[108px] py-5 px-4 rounded-3xl bg-cyan-500 hover:bg-cyan-400 border-2 border-cyan-300 shadow-lg flex flex-col items-center justify-center transition">
+            <span class="mono text-5xl sm:text-6xl font-black text-slate-950 leading-none" style="font-size:3.25rem;line-height:1;font-weight:900;">+</span>
+            <span class="text-base sm:text-lg font-extrabold text-slate-950 mt-1" style="font-size:1.1rem;font-weight:800;margin-top:4px;">Shift Up</span> <span class="sr-only">Harder Gear</span>
+          </button>
+        </div>
 
-  <section id="advancedPanel" class="advanced-panel">
-    <div class="adv-row">
-      <span><strong>Drivetrain Mode:</strong></span>
-      <div>
-        <button id="btnModeDream" class="btn-small active">Dream Drive (1×50)</button>
-        <button id="btnMode2x12" class="btn-small">Road (2×12)</button>
-      </div>
-    </div>
+        <!-- Large Multi-Shift Jump Buttons -->
+        <div class="grid-3 grid grid-cols-3 gap-2.5" style="margin-top:0.65rem;">
+          <button id="jumpDownBtn" type="button" class="shift-btn btn-secondary py-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-sm sm:text-base font-extrabold text-slate-200 transition">
+            « −3 Quick Climb
+          </button>
+          <button id="resetGearBtn" type="button" class="shift-btn btn-secondary py-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-xs sm:text-sm font-bold text-slate-400 transition">
+            Reset Middle Gear
+          </button>
+          <button id="jumpUpBtn" type="button" class="shift-btn btn-secondary py-3.5 rounded-2xl bg-slate-950 hover:bg-slate-800 border border-slate-800 text-sm sm:text-base font-extrabold text-slate-200 transition">
+            +3 Quick Sprint »
+          </button>
+        </div>
 
-    <div class="adv-row">
-      <span>Gear Ratio: <strong id="advRatio">2.55</strong></span>
-      <span>Target Brake Load: <strong id="advResistance">38%</strong></span>
-      <span>Teeth: <strong id="advTeeth">Virtual</strong></span>
-    </div>
+        <!-- Front Derailleur Shifters (Hidden in Dream Drive; revealed in 2x12 mode) -->
+        <div id="frontShiftRow" class="hidden grid-2 grid grid-cols-2 gap-3 pt-1" style="display:none;margin-top:0.5rem;">
+          <button id="frontDownBtn" type="button" class="shift-btn btn-secondary py-4 px-4 rounded-2xl bg-slate-950 border border-slate-700 flex items-center justify-between transition">
+            <span class="sr-only">Front Derailleur</span> <span class="text-sm font-extrabold text-white">Small Ring (1)</span>
+            <span class="mono text-lg font-black text-amber-400">34T ↓</span>
+          </button>
+          <button id="frontUpBtn" type="button" class="shift-btn btn-secondary py-4 px-4 rounded-2xl bg-slate-950 border border-slate-700 flex items-center justify-between transition">
+            <span class="sr-only">Front Derailleur</span> <span class="text-sm font-extrabold text-white">Big Ring (2)</span>
+            <span class="mono text-lg font-black text-emerald-400">50T ↑</span>
+          </button>
+        </div>
+      </section>
 
-    <hr style="border-color: #1e293b;">
+      <!-- ROW 2: DEDICATED FULL-WIDTH ELAPSED TIME BOX WITH START/STOP -->
+      <section class="card-box bg-slate-900 border-2 border-slate-800 rounded-3xl p-4 sm:p-5">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4" style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:1rem;">
+          <div>
+            <div class="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-slate-400" style="color:#94a3b8;font-weight:800;text-transform:uppercase;font-size:0.8rem;">Elapsed Ride Time</div>
+            <div id="elapsedTimeValue" class="mono giant-timer-num text-5xl sm:text-6xl font-black text-white tracking-tight leading-none mt-1">00:00</div>
+          </div>
 
-    <div class="slider-wrap">
-      <label for="simCadenceSlider">
-        <strong>Simulator Rider Cadence:</strong> <span id="simCadenceVal">85</span> RPM
-      </label>
-      <input type="range" id="simCadenceSlider" min="0" max="130" value="85">
-    </div>
+          <div class="grid-2 sm:flex items-center gap-3" style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <button id="timerToggleBtn" type="button" class="touch-btn btn-timer-start min-h-[68px] px-7 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base sm:text-lg tracking-wide shadow-lg transition flex items-center justify-center gap-2">
+              <span id="timerToggleIcon">▶</span>
+              <span id="timerToggleText">START</span>
+            </button>
+            <button id="timerResetBtn" type="button" class="touch-btn btn-secondary min-h-[68px] px-5 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-sm sm:text-base border border-slate-700 transition">
+              RESET
+            </button>
+          </div>
+        </div>
+      </section>
 
-    <div class="adv-row">
-      <span><strong>Test Physical Handlebar Shifters:</strong></span>
-      <div>
-        <button id="btnSimBarDown" class="btn-small">👈 Bar Shift −</button>
-        <button id="btnSimBarUp" class="btn-small">👉 Bar Shift +</button>
-      </div>
-    </div>
+      <!-- ROW 3: POWER, CADENCE, SPEED (LARGE READOUTS BELOW) -->
+      <section class="grid-3 grid grid-cols-3 gap-3">
+        <!-- Power Box -->
+        <div class="card-box bg-slate-900 border-2 border-slate-800 rounded-3xl p-4 text-center" style="text-align:center;">
+          <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-amber-400" style="color:#fbbf24;font-weight:800;text-transform:uppercase;">Power</div>
+          <div id="powerValue" class="mono metric-num text-4xl sm:text-5xl font-black text-white leading-none my-2">170</div>
+          <div class="text-xs sm:text-sm font-bold text-slate-400" style="color:#94a3b8;font-weight:700;">WATTS</div>
+        </div>
 
-    <div>
-      <div style="margin-bottom: 6px; font-size: 0.85rem; color: var(--muted);">
-        <strong>BLE FTMS &amp; Shifter Log:</strong>
-      </div>
-      <div id="bleLog" class="log-box">Ready. Running in Simulator Mode.</div>
-    </div>
-  </section>
+        <!-- Cadence Box -->
+        <div class="card-box bg-slate-900 border-2 border-slate-800 rounded-3xl p-4 text-center" style="text-align:center;">
+          <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-400" style="color:#34d399;font-weight:800;text-transform:uppercase;">Cadence</div>
+          <div id="cadenceValue" class="mono metric-num text-4xl sm:text-5xl font-black text-white leading-none my-2">85</div>
+          <div class="text-xs sm:text-sm font-bold text-slate-400" style="color:#94a3b8;font-weight:700;">RPM</div>
+        </div>
+
+        <!-- Speed Box -->
+        <div class="card-box bg-slate-900 border-2 border-slate-800 rounded-3xl p-4 text-center" style="text-align:center;">
+          <div class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-cyan-400" style="color:#22d3ee;font-weight:800;text-transform:uppercase;">Speed</div>
+          <div id="speedValue" class="mono metric-num text-4xl sm:text-5xl font-black text-white leading-none my-2">26.8</div>
+          <div class="text-xs sm:text-sm font-bold text-slate-400" style="color:#94a3b8;font-weight:700;">KM/H</div>
+        </div>
+      </section>
+
+      <!-- ROW 4: ADVANCED CHECKBOX & COLLAPSIBLE DETAILED DATA AREA -->
+      <section class="card-box bg-slate-900 border border-slate-800 rounded-2xl p-4">
+        <div id="advancedToggleRow" class="flex items-center justify-between cursor-pointer select-none py-1" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;">
+          <label for="advancedToggleCheckbox" class="flex items-center gap-3 cursor-pointer" style="display:flex;align-items:center;gap:0.75rem;cursor:pointer;">
+            <input id="advancedToggleCheckbox" type="checkbox" style="width:22px;height:22px;accent-color:#22d3ee;cursor:pointer;" />
+            <span class="text-sm sm:text-base font-bold text-slate-200" style="font-weight:700;">Show Advanced Data &amp; Simulator Settings</span>
+          </label>
+          <span id="advancedChevron" class="text-xs font-bold uppercase tracking-wider text-slate-400" style="color:#94a3b8;font-weight:700;">Hidden ▾</span>
+        </div>
+
+        <!-- Hidden by default until checkbox is checked (uses both class="hidden" AND inline style="display:none") -->
+        <div id="advancedDetailsArea" class="hidden mt-4 pt-4 border-t border-slate-800 space-y-4" style="display:none;margin-top:1rem;padding-top:1rem;border-top:1px solid #1e293b;">
+
+          <!-- Drivetrain Setup Selector -->
+          <div class="space-y-2" style="margin-bottom:1rem;">
+            <div class="flex items-center justify-between text-xs text-slate-400 font-semibold uppercase tracking-wider" style="display:flex;justify-content:space-between;margin-bottom:0.5rem;">
+              <span id="drivetrainSubtitle">Stages Dream Drive (1×50)</span>
+              <span id="toothComboBadge" class="mono text-cyan-300 bg-cyan-950/70 border border-cyan-800/60 px-2.5 py-0.5 rounded-full">Virtual Ratio 2.46 (Gear 20/50)</span>
+            </div>
+            <div class="grid-2 grid grid-cols-2 gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+              <button id="modeDreamBtn" type="button" class="btn-ble py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition bg-cyan-500 text-slate-950 shadow" style="justify-content:center;">
+                Dream Drive (1×50 Virtual)
+              </button>
+              <button id="mode2x12Btn" type="button" class="btn-secondary py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-400 hover:text-white">
+                2×12 Road Setup (50/34 × 11–30)
+              </button>
+            </div>
+          </div>
+
+          <!-- Detailed Telemetry Diagnostics -->
+          <div class="inner-box bg-slate-950 border border-slate-800 rounded-2xl p-3.5 space-y-3" style="text-align:left;margin-bottom:1rem;">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs" style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.75rem;">
+              <div class="flex items-center gap-2">
+                <span id="telemetrySourceBadge" class="font-semibold uppercase px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-300 border border-amber-500/30">Sim Pedaling</span>
+                <span id="powerZoneLabel" class="text-slate-400 font-medium">Watts (Endurance Z2)</span>
+              </div>
+              <span id="effortPercentLabel" class="mono text-cyan-300 font-semibold">Target Resistance Load: 41%</span>
+            </div>
+
+            <div class="flex items-center justify-between text-xs" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <label for="simCadenceSlider" class="text-slate-300 font-medium">Simulated Rider Cadence:</label>
+              <div class="flex items-center gap-2" style="display:flex;align-items:center;gap:0.5rem;">
+                <span id="simCadenceSliderLabel" class="mono text-cyan-300 font-bold">85 RPM</span>
+                <button id="simPedalToggleBtn" type="button" class="btn-secondary px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-semibold transition" style="min-height:34px;">
+                  ⏸ Pause Sim Rider
+                </button>
+              </div>
+            </div>
+            <input id="simCadenceSlider" type="range" min="0" max="130" value="85" class="w-full accent-cyan-400 cursor-pointer h-2.5 bg-slate-800 rounded-lg" style="width:100%;" />
+
+            <!-- Physical Handlebar Shifter Packet Tester -->
+            <div class="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:0.5rem;margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid #1e293b;">
+              <div class="text-[11px] text-slate-400">
+                <span class="font-semibold text-slate-300">SB20 Bar Notify (11B):</span>
+                <span id="lastGearPacketHex" class="mono text-cyan-300 ml-1">[01 02 02 14 32 11 00 00 00 00 B2]</span>
+              </div>
+              <div class="flex items-center gap-1.5" style="display:flex;gap:0.5rem;">
+                <button id="simHandlebarDownBtn" type="button" class="btn-secondary px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition" style="min-height:36px;">
+                  👈 Sim Bar Shift −
+                </button>
+                <button id="simHandlebarUpBtn" type="button" class="btn-secondary px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition" style="min-height:36px;">
+                  👉 Sim Bar Shift +
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- BLE Command Log -->
+          <div class="inner-box bg-slate-950 border border-slate-800 rounded-2xl p-3" style="text-align:left;">
+            <div class="flex items-center justify-between mb-1.5" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-400">BLE Command &amp; Event Log</span>
+              <button id="clearLogBtn" type="button" class="btn-secondary text-xs text-slate-300 hover:text-white" style="min-height:30px;padding:0.25rem 0.6rem;">Clear</button>
+            </div>
+            <div id="bleLogBox" class="mono text-[11px] text-slate-300 bg-slate-900 rounded-xl p-2.5 h-24 overflow-y-auto space-y-1 border border-slate-800" style="max-height:110px;overflow-y:auto;background:#0f172a;padding:0.5rem;border-radius:0.5rem;font-size:0.75rem;">
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
 
   <script>
-    // --- App State (Dream Drive is default) ---
+    // Helper to guarantee show/hide works even without external CSS libraries
+    function setElementVisible(el, visible, displayType) {
+      if (!el) return;
+      if (visible) {
+        el.classList.remove('hidden');
+        el.style.display = displayType || 'block';
+      } else {
+        el.classList.add('hidden');
+        el.style.display = 'none';
+      }
+    }
+
+    // =========================================================================
+    // PART 1: APP STATE (Dream Drive 1x50 is default + Elapsed Ride Timer)
+    // =========================================================================
+    const COGS_12_SPEED = [30, 27, 24, 21, 19, 17, 16, 15, 14, 13, 12, 11];
+    const FRONT_RINGS = [34, 50];
+
     const state = {
-      mode: 'dream',          // 'dream' (1x50) or '2x12'
-      dreamGear: 20,          // 1 to 50
-      frontRing: 2,           // 1 (34T) or 2 (50T)
-      rearCog: 6,             // 1 to 12
-      chainrings: [34, 50],
-      cassette: [30, 28, 25, 23, 21, 19, 17, 15, 14, 13, 12, 11],
+      mode: 'dream',         // 'dream' (Stages Dream Drive 1x50 default) or '2x12'
+      frontGear: 2,          // 1 (34T) or 2 (50T) when in 2x12 mode
+      rearGear: 20,          // Starts at Gear 20 of 50 in Dream Drive
+      soundEnabled: true,
+      bleConnected: false,
+      bleDeviceName: null,
+      ftmsControlPoint: null,
+      simPedaling: true,
+      baseCadence: 85,
+      liveWatts: 170,
+      liveCadence: 85,
+      liveSpeedKmh: 26.8,
+      customGearChar: null,
       timerRunning: false,
-      elapsedSeconds: 0,
-      connected: false,
-      simCadence: 85,
-      livePower: 0,
-      liveCadence: 0,
-      liveSpeed: 0,
-      ftmsControlPoint: null
+      elapsedSeconds: 0
     };
 
-    // --- DOM Elements ---
-    const el = {
-      connStatus: document.getElementById('connStatus'),
-      connText: document.getElementById('connText'),
-      btnConnect: document.getElementById('btnConnect'),
-      gearModeLabel: document.getElementById('gearModeLabel'),
-      gearDisplay: document.getElementById('gearDisplay'),
-      gearSubLabel: document.getElementById('gearSubLabel'),
-      gearBarFill: document.getElementById('gearBarFill'),
-      chainringRow: document.getElementById('chainringRow'),
-      btnRing1: document.getElementById('btnRing1'),
-      btnRing2: document.getElementById('btnRing2'),
-      btnShiftDown: document.getElementById('btnShiftDown'),
-      btnShiftUp: document.getElementById('btnShiftUp'),
-      btnJumpDown: document.getElementById('btnJumpDown'),
-      btnJumpUp: document.getElementById('btnJumpUp'),
-      timerDisplay: document.getElementById('timerDisplay'),
-      btnTimerToggle: document.getElementById('btnTimerToggle'),
-      btnTimerReset: document.getElementById('btnTimerReset'),
-      valPower: document.getElementById('valPower'),
-      valCadence: document.getElementById('valCadence'),
-      valSpeed: document.getElementById('valSpeed'),
-      chkAdvanced: document.getElementById('chkAdvanced'),
-      advancedPanel: document.getElementById('advancedPanel'),
-      btnModeDream: document.getElementById('btnModeDream'),
-      btnMode2x12: document.getElementById('btnMode2x12'),
-      advRatio: document.getElementById('advRatio'),
-      advResistance: document.getElementById('advResistance'),
-      advTeeth: document.getElementById('advTeeth'),
-      simCadenceSlider: document.getElementById('simCadenceSlider'),
-      simCadenceVal: document.getElementById('simCadenceVal'),
-      btnSimBarDown: document.getElementById('btnSimBarDown'),
-      btnSimBarUp: document.getElementById('btnSimBarUp'),
-      bleLog: document.getElementById('bleLog')
-    };
+    let audioCtx = null;
+    function playShiftClick(isUpShift) {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
 
-    function logMsg(msg) {
-      const time = new Date().toLocaleTimeString();
-      el.bleLog.textContent = `[${time}] ${msg}\n` + el.bleLog.textContent.slice(0, 1200);
-    }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(isUpShift ? 520 : 380, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(isUpShift ? 780 : 260, audioCtx.currentTime + 0.045);
 
-    // --- Drivetrain Math ---
-    function computeGearMetrics() {
-      if (state.mode === 'dream') {
-        // Dream Drive: 50 evenly spaced virtual ratios from 1.10 to 4.60
-        const minR = 1.10;
-        const maxR = 4.60;
-        const norm = (state.dreamGear - 1) / 49;
-        const ratio = minR + norm * (maxR - minR);
-        const resistancePct = Math.round(10 + norm * 75);
-        return {
-          ratio: ratio.toFixed(2),
-          resistancePct,
-          progressPct: Math.round(((state.dreamGear) / 50) * 100),
-          teethText: `Virtual ${state.dreamGear}/50`
-        };
-      } else {
-        const frontTeeth = state.chainrings[state.frontRing - 1];
-        const rearTeeth = state.cassette[state.rearCog - 1];
-        const ratio = frontTeeth / rearTeeth;
-        const minR = 34 / 30;
-        const maxR = 50 / 11;
-        const norm = Math.max(0, Math.min(1, (ratio - minR) / (maxR - minR)));
-        const resistancePct = Math.round(10 + norm * 75);
-        return {
-          ratio: ratio.toFixed(2),
-          resistancePct,
-          progressPct: Math.round((state.rearCog / 12) * 100),
-          teethText: `${frontTeeth}×${rearTeeth}T`
-        };
+        gain.gain.setValueAtTime(0.18, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.045);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.05);
+      } catch (err) {
+        // Ignore audio errors if blocked by browser policy
       }
     }
 
-    // --- UI Rendering ---
-    function renderUI() {
-      const metrics = computeGearMetrics();
-
-      if (state.mode === 'dream') {
-        el.gearModeLabel.textContent = 'DREAM DRIVE GEAR (1–50)';
-        el.gearDisplay.textContent = state.dreamGear;
-        el.gearSubLabel.textContent = 'of 50';
-        el.chainringRow.style.display = 'none';
-        el.btnJumpDown.textContent = '−5';
-        el.btnJumpUp.textContent = '+5';
-      } else {
-        el.gearModeLabel.textContent = 'ROAD 2×12 GEAR';
-        el.gearDisplay.textContent = `${state.frontRing}-${state.rearCog}`;
-        el.gearSubLabel.textContent = metrics.teethText;
-        el.chainringRow.style.display = 'grid';
-        el.btnRing1.classList.toggle('active', state.frontRing === 1);
-        el.btnRing2.classList.toggle('active', state.frontRing === 2);
-        el.btnJumpDown.textContent = '−3';
-        el.btnJumpUp.textContent = '+3';
-      }
-
-      el.gearBarFill.style.width = `${metrics.progressPct}%`;
-      el.advRatio.textContent = metrics.ratio;
-      el.advResistance.textContent = `${metrics.resistancePct}%`;
-      el.advTeeth.textContent = metrics.teethText;
-
-      el.btnModeDream.classList.toggle('active', state.mode === 'dream');
-      el.btnMode2x12.classList.toggle('active', state.mode === '2x12');
-    }
-
-    // --- Shifting Controls ---
-    function shiftGear(delta) {
-      if (state.mode === 'dream') {
-        state.dreamGear = Math.max(1, Math.min(50, state.dreamGear + delta));
-      } else {
-        state.rearCog = Math.max(1, Math.min(12, state.rearCog + delta));
-      }
-      renderUI();
-      sendGearToBike();
-    }
-
-    el.btnShiftDown.addEventListener('click', () => shiftGear(-1));
-    el.btnShiftUp.addEventListener('click', () => shiftGear(1));
-    el.btnJumpDown.addEventListener('click', () => shiftGear(state.mode === 'dream' ? -5 : -3));
-    el.btnJumpUp.addEventListener('click', () => shiftGear(state.mode === 'dream' ? 5 : 3));
-
-    el.btnRing1.addEventListener('click', () => {
-      state.frontRing = 1;
-      renderUI();
-      sendGearToBike();
-    });
-
-    el.btnRing2.addEventListener('click', () => {
-      state.frontRing = 2;
-      renderUI();
-      sendGearToBike();
-    });
-
-    // --- Elapsed Time Controls ---
-    function formatElapsedTime(sec) {
-      const hrs = Math.floor(sec / 3600);
-      const mins = Math.floor((sec % 3600) / 60);
-      const secs = sec % 60;
+    // =========================================================================
+    // PART 2: ELAPSED TIME FORMATTER & CONTROLS
+    // =========================================================================
+    function formatElapsedTime(totalSeconds) {
+      const hrs = Math.floor(totalSeconds / 3600);
+      const mins = Math.floor((totalSeconds % 3600) / 60);
+      const secs = totalSeconds % 60;
       const mm = String(mins).padStart(2, '0');
       const ss = String(secs).padStart(2, '0');
-      return hrs > 0 ? `${String(hrs).padStart(2, '0')}:${mm}:${ss}` : `${mm}:${ss}`;
+      if (hrs > 0) {
+        return `${String(hrs).padStart(2, '0')}:${mm}:${ss}`;
+      }
+      return `${mm}:${ss}`;
     }
 
     function renderTimerUI() {
-      el.timerDisplay.textContent = formatElapsedTime(state.elapsedSeconds);
+      document.getElementById('elapsedTimeValue').textContent = formatElapsedTime(state.elapsedSeconds);
+      const toggleBtn = document.getElementById('timerToggleBtn');
+      const toggleIcon = document.getElementById('timerToggleIcon');
+      const toggleText = document.getElementById('timerToggleText');
+
       if (state.timerRunning) {
-   
+        toggleBtn.className = 'touch-btn btn-timer-stop min-h-[68px] px-7 py-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-base sm:text-lg tracking-wide shadow-lg transition flex items-center justify-center gap-2';
+        toggleIcon.textContent = '⏸';
+        toggleText.textContent = 'STOP';
+      } else {
+        toggleBtn.className = 'touch-btn btn-timer-start min-h-[68px] px-7 py-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-base sm:text-lg tracking-wide shadow-lg transition flex items-center justify-center gap-2';
+        toggleIcon.textContent = '▶';
+        toggleText.textContent = state.elapsedSeconds > 0 ? 'RESUME' : 'START';
+      }
+    }
+
+    // =========================================================================
+    // PART 3: GEAR MATH & BLUETOOTH COMMAND CALCULATION
+    // =========================================================================
+    function computeGearMetrics() {
+      if (state.mode === '2x12') {
+        const frontTeeth = FRONT_RINGS[state.frontGear - 1];
+        const rearTeeth = COGS_12_SPEED[state.rearGear - 1];
+        const ratio = (frontTeeth / rearTeeth).toFixed(2);
+        const minRatio = 34 / 30;
+        const maxRatio = 50 / 11;
+        const norm = (frontTeeth / rearTeeth - minRatio) / (maxRatio - minRatio);
+        const resistancePct = Math.round(12 + norm * 73);
+        return { frontTeeth, rearTeeth, ratio, resistancePct };
+      } else {
+        const norm = (state.rearGear - 1) / 49;
+        const ratio = (1.10 + norm * 3.50).toFixed(2);
+        const resistancePct = Math.round(10 + norm * 80);
+        return { frontTeeth: 50, rearTeeth: null, ratio, resistancePct };
+      }
+    }
+
+    function appendLog(message) {
+      const box = document.getElementById('bleLogBox');
+      if (!box) return;
+      const now = new Date();
+      const timeStr = now.toTimeString().split(' ')[0];
+      const line = document.createElement('div');
+      line.style.marginBottom = '4px';
+      line.innerHTML = `<span style="color:#64748b;">[${timeStr}]</span> <span style="color:#67e8f9;">${message}</span>`;
+      box.prepend(line);
+    }
+
+    function showToast(msg) {
+      const banner = document.getElementById('toastBanner');
+      const text = document.getElementById('toastMessage');
+      if (text) text.textContent = msg;
+      setElementVisible(banner, true, 'block');
+    }
+
+    async function sendGearToBike() {
+      const metrics = computeGearMetrics();
+      const payloadHex = `0x04, 0x${metrics.resistancePct.toString(16).padStart(2, '0').toUpperCase()}`;
+
+      if (state.bleConnected && state.ftmsControlPoint) {
+        try {
+          const data = new Uint8Array([0x04, metrics.resistancePct]);
+          await state.ftmsControlPoint.writeValue(data);
+          appendLog(`BLE Write (0x2AD9) → [${payloadHex}] (Load ${metrics.resistancePct}%)`);
+        } catch (err) {
+          appendLog(`BLE Write Error: ${err.message}`);
+        }
+      } else {
+        const gearTag = state.mode === '2x12'
+          ? `Gear ${state.frontGear}-${state.rearGear} (${metrics.frontTeeth}×${metrics.rearTeeth}T)`
+          : `Dream Drive Gear ${state.rearGear}/50`;
+        appendLog(`${gearTag} → Payload [${payloadHex}] (${metrics.resistancePct}% load)`);
+      }
+    }
+
+    // =========================================================================
+    // PART 4: TELEMETRY PARSER (0x2AD2) & HANDLEBAR SHIFTER SYNC
+    // =========================================================================
+    function formatPacketHex(bytes) {
+      return '[' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ') + ']';
+    }
+
+    function buildSb20GearPacket(front, rear) {
+      const metrics = computeGearMetrics();
+      const rearTeeth = metrics.rearTeeth || 17;
+      const checksum = (0x01 + 0x02 + front + rear + metrics.frontTeeth + rearTeeth) & 0xff;
+      return new Uint8Array([0x01, 0x02, front, rear, metrics.frontTeeth, rearTeeth, 0x00, 0x00, 0x00, 0x00, checksum]);
+    }
+
+    function handleSb20GearNotification(uint8Data, sourceName) {
+      const hexStr = formatPacketHex(uint8Data);
+      const packetLabel = document.getElementById('lastGearPacketHex');
+      if (packetLabel) packetLabel.textContent = hexStr;
+
+      if (uint8Data.length >= 4) {
+        const incomingFront = uint8Data[2];
+        const incomingRear = uint8Data[3];
+        const maxRear = state.mode === '2x12' ? 12 : 50;
+
+        let changed = false;
+        if (incomingFront >= 1 && incomingFront <= 2 && incomingFront !== state.frontGear) {
+          state.frontGear = incomingFront;
+          changed = true;
+        }
+        if (incomingRear >= 1 && incomingRear <= maxRear && incomingRear !== state.rearGear) {
+          const isUp = incomingRear > state.rearGear;
+          state.rearGear = incomingRear;
+          playShiftClick(isUp);
+          changed = true;
+        }
+        if (changed) {
+          renderUI();
+          updateSimulatedTelemetry();
+        }
+        appendLog(`${sourceName} Notify (${uint8Data.length}B) → ${hexStr} (Synced Gear ${state.rearGear})`);
+      }
+    }
+
+    function handleIndoorBikeData(event) {
+      const view = event.target.value;
+      if (!view || view.byteLength < 4) return;
+
+      const flags = view.getUint16(0, true);
+      let offset = 2;
+
+      if ((flags & 0x0001) === 0 && offset + 2 <= view.byteLength) {
+        state.liveSpeedKmh = +(view.getUint16(offset, true) / 100).toFixed(1);
+        offset += 2;
+      }
+      if ((flags & 0x0002) !== 0) offset += 2;
+
+      if ((flags & 0x0004) !== 0 && offset + 2 <= view.byteLength) {
+        state.liveCadence = Math.round(view.getUint16(offset, true) * 0.5);
+        offset += 2;
+      }
+      if ((flags & 0x0008) !== 0) offset += 2;
+      if ((flags & 0x0010) !== 0) offset += 3;
+      if ((flags & 0x0020) !== 0) offset += 2;
+
+      if ((flags & 0x0040) !== 0 && offset + 2 <= view.byteLength) {
+        state.liveWatts = Math.max(0, view.getInt16(offset, true));
+        offset += 2;
+      }
+
+      renderTelemetryUI();
+    }
+
+    function getPowerZoneText(watts) {
+      if (watts === 0) return 'Watts (Coasting)';
+      if (watts < 140) return 'Watts (Recovery Z1)';
+      if (watts < 210) return 'Watts (Endurance Z2)';
+      if (watts < 260) return 'Watts (Tempo Z3)';
+      if (watts < 310) return 'Watts (Threshold Z4)';
+      return 'Watts (VO2 Max Z5+)';
+    }
+
+    function renderTelemetryUI() {
+      const powerEl = document.getElementById('powerValue');
+      const zoneEl = document.getElementById('powerZoneLabel');
+      const cadenceEl = document.getElementById('cadenceValue');
+      const speedEl = document.getElementById('speedValue');
+
+      if (powerEl) powerEl.textContent = String(state.liveWatts);
+      if (zoneEl) zoneEl.textContent = getPowerZoneText(state.liveWatts);
+      if (cadenceEl) cadenceEl.textContent = String(state.liveCadence);
+      if (speedEl) speedEl.textContent = state.liveSpeedKmh.toFixed(1);
+    }
+
+    function updateSimulatedTelemetry() {
+      if (state.bleConnected) return;
+      const metrics = computeGearMetrics();
+      const ratioNum = parseFloat(metrics.ratio);
+
+      if (!state.simPedaling || state.baseCadence === 0) {
+        state.liveCadence = 0;
+        state.liveWatts = 0;
+        state.liveSpeedKmh = 0.0;
+      } else {
+        const jitter = Math.round((Math.random() - 0.5) * 2);
+        state.liveCadence = Math.max(0, state.baseCadence + jitter);
+        state.liveSpeedKmh = +(state.liveCadence * ratioNum * 0.1263).toFixed(1);
+        const rawWatts = (state.liveCadence / 85) * (metrics.resistancePct * 4.2);
+        state.liveWatts = Math.round(Math.max(25, rawWatts));
+      }
+
+      const pkt = buildSb20GearPacket(state.frontGear, state.rearGear);
+      const packetLabel = document.getElementById('lastGearPacketHex');
+      if (packetLabel) packetLabel.textContent = formatPacketHex(pkt);
+
+      renderTelemetryUI();
+    }
+
+    // =========================================================================
+    // PART 5: RENDER UI
+    // =========================================================================
+    function renderUI() {
+      const metrics = computeGearMetrics();
+
+      const mode2x12Btn = document.getElementById('mode2x12Btn');
+      const modeDreamBtn = document.getElementById('modeDreamBtn');
+      const frontGearCard = document.getElementById('frontGearCard');
+      const splitGearContainer = document.getElementById('splitGearContainer');
+      const frontShiftRow = document.getElementById('frontShiftRow');
+      const drivetrainSubtitle = document.getElementById('drivetrainSubtitle');
+      const toothComboBadge = document.getElementById('toothComboBadge');
+      const frontGearValue = document.getElementById('frontGearValue');
+      const frontTeethLabel = document.getElementById('frontTeethLabel');
+      const rearCardTitle = document.getElementById('rearCardTitle');
+      const rearGearValue = document.getElementById('rearGearValue');
+      const rearTeethLabel = document.getElementById('rearTeethLabel');
+      const effortPercentLabel = document.getElementById('effortPercentLabel');
+      const cassetteBar = document.getElementById('cassetteBar');
+
+      if (state.mode === '2x12') {
+        mode2x12Btn.className = 'btn-ble py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition bg-cyan-500 text-slate-950 shadow';
+        modeDreamBtn.className = 'btn-secondary py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-400 hover:text-white';
+
+        setElementVisible(frontGearCard, true, 'block');
+        splitGearContainer.className = 'grid-2 grid grid-cols-2 gap-3 items-center';
+        setElementVisible(frontShiftRow, true, 'grid');
+
+        drivetrainSubtitle.textContent = '2×12 Road Setup';
+        toothComboBadge.textContent = `${metrics.frontTeeth}T × ${metrics.rearTeeth}T (${metrics.ratio} ratio)`;
+
+        frontGearValue.textContent = String(state.frontGear);
+        frontTeethLabel.textContent = state.frontGear === 2 ? 'Big Ring (50T)' : 'Small Ring (34T)';
+
+        rearCardTitle.textContent = 'Rear Cog';
+        rearGearValue.textContent = String(state.rearGear);
+        rearTeethLabel.textContent = `Cog ${state.rearGear}/12 (${metrics.rearTeeth}T)`;
+
+        cassetteBar.style.gridTemplateColumns = 'repeat(12, minmax(0, 1fr))';
+        cassetteBar.innerHTML = '';
+        for (let i = 1; i <= 12; i++) {
+          const cell = document.createElement('div');
+          cell.style.borderRadius = '3px';
+          cell.style.backgroundColor = i <= state.rearGear ? '#22d3ee' : '#1e293b';
+          cassetteBar.appendChild(cell);
+        }
+      } else {
+        // Dream Drive 1x50 Mode (Default)
+        modeDreamBtn.className = 'btn-ble py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition bg-cyan-500 text-slate-950 shadow';
+        mode2x12Btn.className = 'btn-secondary py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition text-slate-400 hover:text-white';
+
+        setElementVisible(frontGearCard, false);
+        splitGearContainer.className = 'grid grid-cols-1 gap-3 items-center';
+        setElementVisible(frontShiftRow, false);
+
+        drivetrainSubtitle.textContent = 'Stages Dream Drive (1×50)';
+        toothComboBadge.textContent = `Virtual Ratio ${metrics.ratio} (Gear ${state.rearGear}/50)`;
+
+        rearCardTitle.textContent = 'Dream Drive Gear';
+        rearGearValue.textContent = String(state.rearGear);
+        rearTeethLabel.textContent = `Gear ${state.rearGear} of 50`;
+
+        cassetteBar.style.gridTemplateColumns = 'repeat(10, minmax(0, 1fr))';
+        cassetteBar.innerHTML = '';
+        const activeBucket = Math.ceil(state.rearGear / 5);
+        for (let i = 1; i <= 10; i++) {
+          const cell = document.createElement('div');
+          cell.style.borderRadius = '3px';
+          cell.style.backgroundColor = i <= activeBucket ? '#22d3ee' : '#1e293b';
+          cassetteBar.appendChild(cell);
+        }
+      }
+
+      effortPercentLabel.textContent = `Target Resistance Load: ${metrics.resistancePct}%`;
+    }
+
+    // =========================================================================
+    // PART 6: SHIFT ACTIONS & WEB BLUETOOTH CONNECTION
+    // =========================================================================
+    function shiftRear(delta) {
+      const maxGear = state.mode === '2x12' ? 12 : 50;
+      const nextGear = Math.max(1, Math.min(maxGear, state.rearGear + delta));
+      if (nextGear !== state.rearGear) {
+        const isUp = nextGear > state.rearGear;
+        state.rearGear = nextGear;
+        playShiftClick(isUp);
+        renderUI();
+        updateSimulatedTelemetry();
+        sendGearToBike();
+      }
+    }
+
+    function shiftFront(targetRing) {
+      if (state.mode !== '2x12') return;
+      if (state.frontGear !== targetRing) {
+        const isUp = targetRing > state.frontGear;
+        state.frontGear = targetRing;
+        playShiftClick(isUp);
+        renderUI();
+        updateSimulatedTelemetry();
+        sendGearToBike();
+      }
+    }
+
+    async function connectBluetoothBike(scanAllDevices) {
+      const btnText = document.getElementById('connectBtnText');
+      const connLabel = document.getElementById('connectionLabel');
+
+      if (btnText) btnText.textContent = 'Opening BLE...';
+      if (connLabel) connLabel.textContent = 'Requesting Android Bluetooth scanner...';
+
+      if (!navigator.bluetooth) {
+        if (btnText) btnText.textContent = 'Connect SB20';
+        if (connLabel) connLabel.textContent = 'Web Bluetooth unavailable in this browser';
+        showToast('Bluetooth requires Chrome on Android opened via your https://.github.io link (not GitHub code view or Samsung/in-app browser).');
+        appendLog('navigator.bluetooth is undefined in this browser.');
+        return;
+      }
+
+      try {
+        appendLog(scanAllDevices ? 'Scanning ALL nearby BLE devices...' : 'Scanning for Stages SB20 (FTMS 0x1826)...');
+        const requestOptions = scanAllDevices
+          ? {
+              acceptAllDevices: true,
+              optionalServices: [0x1826, 0x180a, 0x1818]
+            }
+          : {
+              filters: [
+                { services: [0x1826] },
+                { namePrefix: 'Stages' },
+                { namePrefix: 'STAGES' },
+                { namePrefix: 'SB20' }
+              ],
+              optionalServices: [0x1826, 0x180a, 0x1818]
+            };
+
+        const device = await navigator.bluetooth.requestDevice(requestOptions);
+
+        connLabel.textContent = `Connecting to ${device.name || 'Stages SB20'}...`;
+        btnText.textContent = 'Connecting...';
+
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService(0x1826);
+
+        const controlPoint = await service.getCharacteristic(0x2ad9);
+        await controlPoint.writeValue(new Uint8Array([0x00]));
+
+        try {
+          const bikeDataChar = await service.getCharacteristic(0x2ad2);
+          await bikeDataChar.startNotifications();
+          bikeDataChar.addEventListener('characteristicvaluechanged', handleIndoorBikeData);
+          appendLog('Subscribed to FTMS Indoor Bike Data (0x2AD2).');
+        } catch (telemetryErr) {
+          appendLog(`0x2AD2 notice: ${telemetryErr.message}`);
+        }
+
+        try {
+          const allServices = await server.getPrimaryServices();
+          for (const svc of allServices) {
+            if (svc.uuid.includes('1826') || svc.uuid.includes('180a')) continue;
+            const chars = await svc.getCharacteristics();
+            for (const ch of chars) {
+              if (ch.properties.notify) {
+                await ch.startNotifications();
+                ch.addEventListener('characteristicvaluechanged', (ev) => {
+                  const bytes = new Uint8Array(ev.target.value.buffer);
+                  handleSb20GearNotification(bytes, 'SB20 Handlebar BLE');
+                });
+                state.customGearChar = ch;
+                appendLog(`Subscribed to SB20 Custom Gear Notify (${ch.uuid.slice(0, 8)}...).`);
+              }
+            }
+          }
+        } catch (scanErr) {
+          appendLog(`Custom shifter scan note: ${scanErr.message}`);
+        }
+
+        state.bleConnected = true;
+        state.bleDeviceName = device.name || 'Stages SB20';
+        state.ftmsControlPoint = controlPoint;
+        document.getElementById('telemetrySourceBadge').textContent = 'Live BLE Stream';
+
+        document.getElementById('statusDot').style.background = '#34d399';
+        connLabel.textContent = `Connected to ${state.bleDeviceName}`;
+        btnText.textContent = 'Connected';
+        showToast(`Paired with ${state.bleDeviceName}! Shifting now sends live FTMS commands.`);
+
+        device.addEventListener('gattserverdisconnected', () => {
+          state.bleConnected = false;
+          state.ftmsControlPoint = null;
+          document.getElementById('statusDot').style.background = '#fbbf24';
+          connLabel.textContent = 'Disconnected — Simulator Mode';
+          btnText.textContent = 'Connect SB20';
+          appendLog('Bike disconnected. Reverted to Simulator Mode.');
+        });
+      } catch (err) {
+        btnText.textContent = 'Connect SB20';
+        connLabel.textContent = 'Simulator Ready • Dream Drive';
+        showToast(`Bluetooth message: ${err.message}. Tip: Wake the SB20 by pedaling, or tap "Scan All Bluetooth Devices".`);
+        appendLog(`Bluetooth info: ${err.message}`);
+      }
+    }
+
+    // =========================================================================
+    // PART 7: WIRE UP BUTTON LISTENERS (Runs immediately or on DOMContentLoaded)
+    // =========================================================================
+    let appInitialized = false;
+    function initApp() {
+      if (appInitialized) return;
+      appInitialized = true;
+
+      document.getElementById('rearDownBtn').addEventListener('click', () => shiftRear(-1));
+      document.getElementById('rearUpBtn').addEventListener('click', () => shiftRear(1));
+
+      document.getElementById('jumpDownBtn').addEventListener('click', () => {
+        shiftRear(state.mode === 'dream' ? -5 : -3);
+      });
+      document.getElementById('jumpUpBtn').addEventListener('click', () => {
+        shiftRear(state.mode === 'dream' ? 5 : 3);
+      });
+
+      document.getElementById('resetGearBtn').addEventListener('click', () => {
+        state.frontGear = 2;
+        state.rearGear = state.mode === '2x12' ? 6 : 20;
+        playShiftClick(true);
+        renderUI();
+        updateSimulatedTelemetry();
+        sendGearToBike();
+      });
+
+      document.getElementById('frontDownBtn').addEventListener('click', () => shiftFront(1));
+      document.getElementById('frontUpBtn').addEventListener('click', () => shiftFront(2));
+
+      document.getElementById('timerToggleBtn').addEventListener('click', () => {
+        state.timerRunning = !state.timerRunning;
+        renderTimerUI();
+        appendLog(state.timerRunning ? 'Ride timer started.' : `Ride timer paused at ${formatElapsedTime(state.elapsedSeconds)}.`);
+      });
+
+      document.getElementById('timerResetBtn').addEventListener('click', () => {
+        state.timerRunning = false;
+        state.elapsedSeconds = 0;
+        renderTimerUI();
+        appendLog('Ride timer reset to 00:00.');
+      });
+
+      // Advanced Checkbox & Row Listener (works with or without external CSS)
+      const advCheckbox = document.getElementById('advancedToggleCheckbox');
+      const advArea = document.getElementById('advancedDetailsArea');
+      const advChevron = document.getElementById('advancedChevron');
+      const advRow = document.getElementById('advancedToggleRow');
+
+      function syncAdvancedVisibility() {
+        const isChecked = advCheckbox.checked;
+        setElementVisible(advArea, isChecked, 'block');
+        advChevron.textContent = isChecked ? 'Shown ▴' : 'Hidden ▾';
+      }
+
+      advCheckbox.addEventListener('change', syncAdvancedVisibility);
+      advRow.addEventListener('click', (e) => {
+        if (e.target !== advCheckbox && !e.target.closest('label')) {
+          advCheckbox.checked = !advCheckbox.checked;
+          syncAdvancedVisibility();
+        }
+      });
+
+      document.getElementById('mode2x12Btn').addEventListener('click', () => {
+        if (state.mode !== '2x12') {
+          state.mode = '2x12';
+          state.rearGear = 6;
+          renderUI();
+          updateSimulatedTelemetry();
+          appendLog('Switched to 2×12 Road Setup.');
+        }
+      });
+
+      document.getElementById('modeDreamBtn').addEventListener('click', () => {
+        if (state.mode !== 'dream') {
+          state.mode = 'dream';
+          state.rearGear = 20;
+          renderUI();
+          updateSimulatedTelemetry();
+          appendLog('Switched to Stages Dream Drive (1×50 virtual gears).');
+        }
+      });
+
+      document.getElementById('soundToggleBtn').addEventListener('click', () => {
+        state.soundEnabled = !state.soundEnabled;
+        document.getElementById('soundIcon').textContent = state.soundEnabled ? '🔊 Sound On' : '🔇 Muted';
+      });
+
+      document.getElementById('connectBleBtn').addEventListener('click', () => connectBluetoothBike(false));
+      document.getElementById('scanAllBleBtn').addEventListener('click', () => connectBluetoothBike(true));
+
+      document.getElementById('closeToastBtn').addEventListener('click', () => {
+        setElementVisible(document.getElementById('toastBanner'), false);
+      });
+
+      document.getElementById('clearLogBtn').addEventListener('click', () => {
+        document.getElementById('bleLogBox').innerHTML = '';
+        appendLog('Log cleared.');
+      });
+
+      const simSlider = document.getElementById('simCadenceSlider');
+      const simSliderLabel = document.getElementById('simCadenceSliderLabel');
+      const simToggleBtn = document.getElementById('simPedalToggleBtn');
+
+      simSlider.addEventListener('input', (e) => {
+        state.baseCadence = parseInt(e.target.value, 10) || 0;
+        simSliderLabel.textContent = `${state.baseCadence} RPM`;
+        if (state.baseCadence > 0 && !state.simPedaling) {
+          state.simPedaling = true;
+          simToggleBtn.textContent = '⏸ Pause Sim Rider';
+        }
+        updateSimulatedTelemetry();
+      });
+
+      simToggleBtn.addEventListener('click', () => {
+        state.simPedaling = !state.simPedaling;
+        simToggleBtn.textContent = state.simPedaling ? '⏸ Pause Sim Rider' : '▶ Resume Sim Rider';
+        updateSimulatedTelemetry();
+      });
+
+      document.getElementById('simHandlebarDownBtn').addEventListener('click', () => {
+        const nextRear = Math.max(1, state.rearGear - 1);
+        const pkt = buildSb20GearPacket(state.frontGear, nextRear);
+        handleSb20GearNotification(pkt, 'Sim SB20 Bar Shifter');
+      });
+
+      document.getElementById('simHandlebarUpBtn').addEventListener('click', () => {
+        const maxGear = state.mode === '2x12' ? 12 : 50;
+        const nextRear = Math.min(maxGear, state.rearGear + 1);
+        const pkt = buildSb20GearPacket(state.frontGear, nextRear);
+        handleSb20GearNotification(pkt, 'Sim SB20 Bar Shifter');
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowUp' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          shiftRear(1);
+        } else if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          shiftRear(-1);
+        }
+      });
+
+      if (window.sb20TelemetryTimer) clearInterval(window.sb20TelemetryTimer);
+      window.sb20TelemetryTimer = setInterval(() => {
+        if (state.timerRunning) {
+          state.elapsedSeconds += 1;
+          renderTimerUI();
+        }
+        if (!state.bleConnected && state.simPedaling) {
+          updateSimulatedTelemetry();
+        }
+      }, 1000);
+
+      renderUI();
+      renderTimerUI();
+      updateSimulatedTelemetry();
+      appendLog('Dream Drive (Gear 20/50) & Ride Timer ready.');
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
